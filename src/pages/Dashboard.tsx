@@ -1,13 +1,27 @@
 
 import { Helmet } from "react-helmet";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import DashboardSection from "@/components/sections/DashboardSection";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar, UserCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { WelcomeHeader } from "@/components/sections/dashboard/WelcomeHeader";
+import { FeatureCard } from "@/components/sections/dashboard/FeatureCard";
+import { BookingCTA } from "@/components/sections/dashboard/BookingCTA";
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading, signOut } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await queryClient.clear();
+      await signOut();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -26,13 +40,51 @@ const Dashboard = () => {
     return <Navigate to="/auth" />;
   }
 
+  const features = [
+    {
+      icon: Calendar,
+      title: "Meus Agendamentos",
+      description: "Visualize e gerencie seus agendamentos",
+      action: "Ver Agendamentos",
+      onClick: () => navigate("/appointments")
+    },
+    {
+      icon: UserCircle,
+      title: "Meu Perfil",
+      description: "Atualize suas informações pessoais",
+      action: "Editar Perfil",
+      onClick: () => navigate("/perfil")
+    }
+  ];
+
   return (
     <>
       <Helmet>
         <title>ElevaTI - Dashboard</title>
-        <meta name="description" content="Gerencie seus agendamentos e acesse seus serviços na ElevaTI." />
+        <meta 
+          name="description" 
+          content="Gerencie seus agendamentos e acesse seus serviços na ElevaTI." 
+        />
       </Helmet>
-      <DashboardSection />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="container mx-auto px-4 py-8">
+          <WelcomeHeader 
+            profile={profile} 
+            onSignOut={handleSignOut} 
+          />
+
+          <div className="grid gap-8 md:grid-cols-2">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={index}
+                {...feature}
+              />
+            ))}
+          </div>
+
+          <BookingCTA onBookNow={() => navigate("/booking")} />
+        </div>
+      </div>
     </>
   );
 };
