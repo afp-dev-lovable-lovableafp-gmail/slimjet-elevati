@@ -3,11 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Service } from "@/types/service";
+import type { Tag } from "@/types/tag";
+
+interface ServiceWithTags extends Service {
+  service_tags?: {
+    tag: Tag;
+  }[];
+}
 
 interface ServiceListItemProps {
-  service: Service;
-  onEdit: (service: Service) => void;
-  onDelete: (service: Service) => void;
+  service: ServiceWithTags;
+  onEdit: (service: ServiceWithTags) => void;
+  onDelete: (service: ServiceWithTags) => void;
 }
 
 export const ServiceListItem = ({ service, onEdit, onDelete }: ServiceListItemProps) => {
