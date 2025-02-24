@@ -3,8 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAuth } from '../../useAuth';
 import { supabase } from '@/lib/supabase';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -19,13 +17,6 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
-const createWrapper = () => {
-  const queryClient = new QueryClient();
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
 describe('useAuth', () => {
   const mockUser = { id: '123', email: 'test@example.com' };
 
@@ -38,9 +29,7 @@ describe('useAuth', () => {
       data: { session: { user: mockUser } },
     });
 
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper()
-    });
+    const { result } = renderHook(() => useAuth());
 
     expect(result.current.loading).toBe(true);
     
@@ -53,9 +42,7 @@ describe('useAuth', () => {
   it('deve retornar erro quando autenticação falha', async () => {
     (supabase.auth.getSession as any).mockRejectedValue(new Error('Auth error'));
 
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper()
-    });
+    const { result } = renderHook(() => useAuth());
 
     await waitFor(() => {
       expect(result.current.error).toBeTruthy();
@@ -68,9 +55,7 @@ describe('useAuth', () => {
       data: { session: { user: mockUser } },
     });
 
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper()
-    });
+    const { result } = renderHook(() => useAuth());
 
     await waitFor(() => {
       expect(result.current.authenticated).toBe(true);
@@ -91,9 +76,7 @@ describe('useAuth', () => {
       () => new Promise((resolve) => setTimeout(resolve, 5000))
     );
 
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper()
-    });
+    const { result } = renderHook(() => useAuth());
 
     expect(result.current.loading).toBe(true);
 
