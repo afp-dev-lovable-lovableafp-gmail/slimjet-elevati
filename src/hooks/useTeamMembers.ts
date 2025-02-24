@@ -7,7 +7,7 @@ import { useSpecialtyState } from "./team/useSpecialtyState";
 import type { TeamMember } from "@/types/team";
 
 export const useTeamMembers = () => {
-  const { data: members, isLoading, error } = useTeamMemberQueries();
+  const { data: members, isLoading, error, refetch } = useTeamMemberQueries();
   const { deleteMember } = useTeamMemberMutations();
   const {
     isFormOpen,
@@ -43,6 +43,7 @@ export const useTeamMembers = () => {
     members,
     isLoading,
     error,
+    refetch,
     isFormOpen,
     setIsFormOpen,
     selectedMember,
