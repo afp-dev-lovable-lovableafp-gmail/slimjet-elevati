@@ -1,47 +1,24 @@
 
-import { useAuthFormLogic } from "./useAuthFormLogic";
+import { useState } from "react";
 import { AuthFormWrapper } from "./AuthFormWrapper";
-import { LoginFields } from "./LoginFields";
-import { RegisterFields } from "./RegisterFields";
-import { FormButtons } from "./FormButtons";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
 import type { AuthFormProps } from "./types";
 
 const AuthForm = ({ isAdmin }: AuthFormProps) => {
-  const {
-    isRegistering,
-    setIsRegistering,
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
-    watch,
-    onSubmit
-  } = useAuthFormLogic(isAdmin);
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  const handleToggleMode = () => {
+    setIsRegistering(!isRegistering);
+  };
 
   return (
     <AuthFormWrapper>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <LoginFields
-          register={register}
-          errors={errors}
-          isRegistering={isRegistering}
-        />
-        
-        {isRegistering && (
-          <RegisterFields
-            register={register}
-            errors={errors}
-            watch={watch}
-          />
-        )}
-
-        <FormButtons
-          isSubmitting={isSubmitting}
-          isRegistering={isRegistering}
-          isAdmin={isAdmin}
-          onToggleMode={() => setIsRegistering(!isRegistering)}
-        />
-      </form>
+      {isRegistering ? (
+        <RegisterForm onToggleMode={handleToggleMode} />
+      ) : (
+        <LoginForm onToggleMode={handleToggleMode} />
+      )}
     </AuthFormWrapper>
   );
 };

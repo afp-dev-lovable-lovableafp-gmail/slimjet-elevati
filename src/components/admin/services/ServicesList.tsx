@@ -1,8 +1,6 @@
 
-import { Database, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Database, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -12,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Service } from "@/types/service";
+import { ServiceListItem } from "./ServiceListItem";
 
 interface ServicesListProps {
   services: any; // Usando any temporariamente para acomodar as tags
@@ -30,7 +29,7 @@ export const ServicesList = ({
     return (
       <Card className="p-8">
         <div className="flex items-center justify-center">
-          <Database className="mr-2 h-5 w-5 animate-pulse" />
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           <span>Carregando serviços...</span>
         </div>
       </Card>
@@ -51,42 +50,13 @@ export const ServicesList = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {services?.map((service: any) => (
-            <TableRow key={service.id}>
-              <TableCell className="font-medium">{service.name}</TableCell>
-              <TableCell>{service.description}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {service.service_tags?.map((st: any) => (
-                    <Badge key={st.tag.id} variant="secondary">
-                      {st.tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </TableCell>
-              <TableCell>{service.display_order}</TableCell>
-              <TableCell>
-                <Badge variant={service.is_active ? "default" : "secondary"}>
-                  {service.is_active ? "Ativo" : "Inativo"}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(service)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(service)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
+          {services?.map((service: Service) => (
+            <ServiceListItem
+              key={service.id}
+              service={service}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))}
           {!services?.length && (
             <TableRow>

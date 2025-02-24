@@ -2,7 +2,7 @@
 import { Loader2 } from "lucide-react";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { TeamHeader } from "./team/TeamHeader";
-import { TeamGrid } from "./team/TeamGrid";
+import { TeamMemberGrid } from "./team/TeamMemberGrid";
 
 const TeamSection = () => {
   const { members, isLoading } = useTeamMembers();
@@ -25,7 +25,7 @@ const TeamSection = () => {
             Nossos profissionais são dedicados e trabalham diariamente 
             para entregar as melhores soluções em tecnologia."
         />
-        <TeamGrid members={members || []} />
+        <TeamMemberGrid members={members || []} />
       </div>
     </section>
   );
