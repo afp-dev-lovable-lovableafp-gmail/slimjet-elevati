@@ -1,14 +1,14 @@
 
-import { useTeamMemberState } from "./team/useTeamMemberState";
-import { useTeamMemberActions } from "./team/useTeamMemberActions";
-import { useTeamMemberQuery } from "./team/useTeamMemberQuery";
-import { useSpecialtyState } from "./team/useSpecialtyState";
 import { useCallback } from "react";
+import { useTeamMemberQueries } from "./team/useTeamMemberQueries";
+import { useTeamMemberMutations } from "./team/useTeamMemberMutations";
+import { useTeamMemberState } from "./team/useTeamMemberState";
+import { useSpecialtyState } from "./team/useSpecialtyState";
 import type { TeamMember } from "@/types/team";
 
 export const useTeamMembers = () => {
-  const { members, isLoading, error, refetch } = useTeamMemberQuery();
-  const { handleDelete: deleteTeamMember } = useTeamMemberActions(refetch);
+  const { data: members, isLoading, error } = useTeamMemberQueries();
+  const { deleteMember } = useTeamMemberMutations();
   const {
     isFormOpen,
     setIsFormOpen,
@@ -30,9 +30,9 @@ export const useTeamMembers = () => {
   } = useSpecialtyState();
 
   const handleDelete = useCallback(async (memberId: string) => {
-    await deleteTeamMember(memberId);
+    await deleteMember.mutateAsync(memberId);
     closeDeleteDialog();
-  }, [deleteTeamMember, closeDeleteDialog]);
+  }, [deleteMember, closeDeleteDialog]);
 
   const handleEdit = useCallback((member: TeamMember) => {
     setSelectedMember(member);
@@ -54,7 +54,6 @@ export const useTeamMembers = () => {
     selectedSpecialty,
     setSelectedSpecialty,
     handleEdit,
-    handleDelete,
-    refetch,
+    handleDelete
   };
 };

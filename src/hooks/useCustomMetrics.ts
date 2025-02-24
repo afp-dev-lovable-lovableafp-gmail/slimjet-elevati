@@ -1,14 +1,13 @@
 
 import { useCallback } from "react";
-import { useCustomMetricsQuery } from "./metrics/useCustomMetricsQuery";
-import { useCustomMetricActions } from "./metrics/useCustomMetricActions";
+import { useMetricQueries } from "./metrics/useMetricQueries";
+import { useMetricMutations } from "./metrics/useMetricMutations";
 import { useCustomMetricsState } from "./metrics/useCustomMetricsState";
-import { mapToCustomMetric, mapToDbMetric } from "@/utils/metrics/metricMappers";
 import type { CustomMetric } from "@/types/analytics";
 
 export const useCustomMetrics = () => {
-  const { data: dbMetrics, isLoading, error } = useCustomMetricsQuery();
-  const { createMetric, updateMetric, deleteMetric } = useCustomMetricActions();
+  const { data: metrics, isLoading, error } = useMetricQueries();
+  const { createMetric, updateMetric, deleteMetric } = useMetricMutations();
   const {
     selectedMetric,
     setSelectedMetric,
@@ -22,22 +21,13 @@ export const useCustomMetrics = () => {
     closeDeleteDialog
   } = useCustomMetricsState();
 
-  const metrics = dbMetrics?.map(mapToCustomMetric) ?? [];
-
   const handleCreate = useCallback(async (data: Omit<CustomMetric, 'id'>) => {
-    const dbMetric = mapToDbMetric(data);
-    await createMetric.mutateAsync(dbMetric);
+    await createMetric.mutateAsync(data);
     closeForm();
   }, [createMetric, closeForm]);
 
   const handleUpdate = useCallback(async (data: CustomMetric) => {
-    const dbMetric = {
-      ...mapToDbMetric(data),
-      id: data.id,
-      created_at: data.created_at,
-      updated_at: data.updated_at
-    };
-    await updateMetric.mutateAsync(dbMetric);
+    await updateMetric.mutateAsync(data);
     closeForm();
   }, [updateMetric, closeForm]);
 

@@ -1,14 +1,15 @@
 
-import { useAuth } from "./useAuth";
-import { useAppointmentState } from "./appointments/useAppointmentState";
-import { useAppointmentActions } from "./appointments/useAppointmentActions";
-import { useAppointmentQuery } from "./appointments/useAppointmentQuery";
 import { useCallback } from "react";
+import { useAuth } from "./useAuth";
+import { useAppointmentQueries } from "./appointments/useAppointmentQueries";
+import { useAppointmentMutations } from "./appointments/useAppointmentMutations";
+import { useAppointmentState } from "./appointments/useAppointmentState";
+import type { CreateAppointmentDTO } from "@/types/appointment";
 
 export const useAppointments = () => {
   const { user } = useAuth();
-  const { data: appointments, isLoading, error } = useAppointmentQuery(user?.id);
-  const { createAppointment, updateAppointment, cancelAppointment } = useAppointmentActions(user?.id);
+  const { data: appointments, isLoading, error } = useAppointmentQueries(user?.id);
+  const { createAppointment, updateAppointment, cancelAppointment } = useAppointmentMutations(user?.id);
   const {
     selectedAppointment,
     setSelectedAppointment,
@@ -22,12 +23,12 @@ export const useAppointments = () => {
     closeCancelDialog,
   } = useAppointmentState();
 
-  const handleCreateAppointment = useCallback(async (data: any) => {
+  const handleCreate = useCallback(async (data: CreateAppointmentDTO) => {
     await createAppointment.mutateAsync(data);
     closeForm();
   }, [createAppointment, closeForm]);
 
-  const handleCancelAppointment = useCallback(async (appointmentId: string) => {
+  const handleCancel = useCallback(async (appointmentId: string) => {
     await cancelAppointment.mutateAsync(appointmentId);
     closeCancelDialog();
   }, [cancelAppointment, closeCancelDialog]);
@@ -42,9 +43,9 @@ export const useAppointments = () => {
     setIsFormOpen,
     isCancelDialogOpen,
     setIsCancelDialogOpen,
-    createAppointment: handleCreateAppointment,
+    createAppointment: handleCreate,
     updateAppointment: updateAppointment.mutate,
-    cancelAppointment: handleCancelAppointment,
+    cancelAppointment: handleCancel,
     openForm,
     closeForm,
     openCancelDialog,
