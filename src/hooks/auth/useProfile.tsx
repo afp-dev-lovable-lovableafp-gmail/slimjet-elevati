@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { logger } from "@/features/logging/logger";
 import type { Profile } from "@/types/auth";
 
 export type ProfileStatus = 'idle' | 'loading' | 'error' | 'success';
@@ -28,33 +27,19 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
     try {
       setStatus('loading');
 
-      // First try to get the existing profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError) {
         throw profileError;
       }
 
-      // If profile exists, check admin status
       if (profileData) {
-        const { data: isAdmin, error: adminError } = await supabase
-          .rpc('check_if_admin', { user_id: userId });
-        
-        if (adminError) {
-          logger.warn("auth", "Error checking admin status", { 
-            error: adminError,
-            userId 
-          });
-        }
-
-        setProfile({
-          ...profileData,
-          is_admin: isAdmin || false
-        });
+        // Query admin status directly from profile data
+        setProfile(profileData);
         setStatus('success');
         setError(null);
       } else {
@@ -63,7 +48,8 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
           .from('profiles')
           .insert([{ 
             id: userId,
-            is_admin: false
+            is_admin: false,
+            user_type: 'client'
           }])
           .select()
           .single();
@@ -73,19 +59,15 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
         }
 
         if (newProfile) {
-          setProfile({
-            ...newProfile,
-            is_admin: false
-          });
+          setProfile(newProfile);
           setStatus('success');
           setError(null);
         }
       }
     } catch (err) {
-      const error = err as Error;
-      logger.error("auth", "Error loading profile:", { error });
+      console.error("Error loading profile:", err);
       setStatus('error');
-      setError(error);
+      setError(err as Error);
     }
   };
 

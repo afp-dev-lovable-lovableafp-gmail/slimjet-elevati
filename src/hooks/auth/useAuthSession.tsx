@@ -1,31 +1,24 @@
 
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuthState } from './useAuthState';
 
 export const useAuthSession = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { setUser, setLoading } = useAuthState();
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['session'] }),
-          queryClient.invalidateQueries({ queryKey: ['profile'] })
-        ]);
-        
-        if (event === 'SIGNED_OUT') {
-          navigate('/', { replace: true });
-        }
-      }
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [queryClient, navigate]);
-
-  return null;
+  }, []);
 };
