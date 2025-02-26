@@ -17,13 +17,15 @@ const AdminAuth = () => {
       loading
     });
     
-    if (!loading && user && profile) {
-      if (profile.is_admin) {
-        logger.info("auth", "Redirecionando admin para /manager-admin");
-        navigate("/manager-admin", { replace: true });
-      } else {
-        logger.info("auth", "Usuário não é admin, redirecionando para /");
-        navigate("/", { replace: true });
+    if (!loading) {
+      if (user && profile) {
+        if (profile.is_admin) {
+          logger.info("auth", "Redirecionando admin para /manager-admin");
+          navigate("/manager-admin", { replace: true });
+        } else {
+          logger.info("auth", "Usuário não é admin, redirecionando para /");
+          navigate("/", { replace: true });
+        }
       }
     }
   }, [user, profile, loading, navigate]);

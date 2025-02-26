@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { logger } from "@/utils/logger";
+import { logger } from "@/features/logging/logger";
 
 export const useAdminAuth = () => {
   const { user, profile, loading } = useAuth();
@@ -18,24 +18,29 @@ export const useAdminAuth = () => {
     const checkAuth = async () => {
       if (!loading) {
         if (!user) {
-          logger.system.info("auth", "Redirecionando usuário não autenticado", {
+          logger.info("auth", "Redirecionando usuário não autenticado", {
             path: "/admin-auth"
           });
           navigate("/admin-auth", { replace: true });
           return;
         }
 
-        const isAdmin = profile?.is_admin ?? false;
+        // Aguardar o carregamento do perfil
+        if (!profile) {
+          return;
+        }
+
+        const isAdmin = profile.is_admin ?? false;
         
         if (!isAdmin) {
-          logger.system.warning("auth", "Tentativa de acesso não autorizado à área admin", {
+          logger.warning("auth", "Tentativa de acesso não autorizado à área admin", {
             userId: user.id
           });
           navigate("/", { replace: true });
           return;
         }
 
-        logger.system.info("auth", "Acesso admin autorizado", {
+        logger.info("auth", "Acesso admin autorizado", {
           userId: user.id
         });
       }
