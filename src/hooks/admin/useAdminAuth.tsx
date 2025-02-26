@@ -33,7 +33,7 @@ export const useAdminAuth = () => {
         const isAdmin = profile.is_admin ?? false;
         
         if (!isAdmin) {
-          logger.warning("auth", "Tentativa de acesso não autorizado à área admin", {
+          logger.warn("auth", "Tentativa de acesso não autorizado à área admin", {
             userId: user.id
           });
           navigate("/", { replace: true });
