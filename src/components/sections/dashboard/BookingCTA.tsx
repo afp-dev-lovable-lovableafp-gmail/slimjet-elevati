@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
 interface BookingCTAProps {
-  onBookNow: () => void;
+  onBookingClick: () => void;
 }
 
-export const BookingCTA = ({ onBookNow }: BookingCTAProps) => {
+export const BookingCTA = ({ onBookingClick }: BookingCTAProps) => {
   return (
     <Card className="mt-8 p-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -20,7 +20,7 @@ export const BookingCTA = ({ onBookNow }: BookingCTAProps) => {
           </p>
         </div>
         <Button
-          onClick={onBookNow}
+          onClick={onBookingClick}
           variant="secondary"
           size="lg"
           className="flex items-center gap-2"

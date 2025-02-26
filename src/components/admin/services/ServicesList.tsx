@@ -4,17 +4,29 @@ import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import type { Service } from "@/types/service";
-import { ServiceListItem } from "./ServiceListItem";
+import type { Tag } from "@/types/tag";
+import { ServiceNameCell } from "./table/ServiceNameCell";
+import { ServiceDescriptionCell } from "./table/ServiceDescriptionCell";
+import { ServiceTagsCell } from "./table/ServiceTagsCell";
+import { ServiceOrderCell } from "./table/ServiceOrderCell";
+import { ServiceStatusCell } from "./table/ServiceStatusCell";
+import { ServiceActionsCell } from "./table/ServiceActionsCell";
+
+interface ServiceWithTags extends Service {
+  service_tags?: {
+    tag: Tag;
+  }[];
+}
 
 interface ServicesListProps {
-  services: any; // Usando any temporariamente para acomodar as tags
+  services: ServiceWithTags[];
   isLoading: boolean;
+  error?: Error;
   onEdit: (service: Service) => void;
   onDelete: (service: Service) => void;
 }
@@ -22,9 +34,20 @@ interface ServicesListProps {
 export const ServicesList = ({
   services,
   isLoading,
+  error,
   onEdit,
   onDelete,
 }: ServicesListProps) => {
+  if (error) {
+    return (
+      <Card className="p-8">
+        <div className="flex items-center justify-center text-red-500">
+          <span>Erro: {error.message}</span>
+        </div>
+      </Card>
+    );
+  }
+
   if (isLoading) {
     return (
       <Card className="p-8">
@@ -50,19 +73,25 @@ export const ServicesList = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {services?.map((service: Service) => (
-            <ServiceListItem
-              key={service.id}
-              service={service}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+          {services?.map((service) => (
+            <TableRow key={service.id}>
+              <ServiceNameCell service={service} />
+              <ServiceDescriptionCell service={service} />
+              <ServiceTagsCell service={service} />
+              <ServiceOrderCell service={service} />
+              <ServiceStatusCell service={service} />
+              <ServiceActionsCell 
+                service={service}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            </TableRow>
           ))}
           {!services?.length && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center">
+              <td colSpan={6} className="text-center">
                 Nenhum serviço encontrado
-              </TableCell>
+              </td>
             </TableRow>
           )}
         </TableBody>

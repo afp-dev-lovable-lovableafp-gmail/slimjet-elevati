@@ -1,107 +1,53 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-
-interface FeedbackData {
-  rating: number;
-  sentiment: string;
-  comment: string;
-  created_at: string;
-}
+import { RatingDistribution } from "./satisfaction/RatingDistribution";
+import { SentimentDistribution } from "./satisfaction/SentimentDistribution";
+import { RecentComments } from "./satisfaction/RecentComments";
+import type { FeedbackData } from "./types";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, Star } from "lucide-react";
 
 interface SatisfactionSurveysProps {
   feedbacks: FeedbackData[];
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
-
 const SatisfactionSurveys = ({ feedbacks }: SatisfactionSurveysProps) => {
-  const ratingDistribution = Array.from({ length: 5 }, (_, i) => ({
-    rating: i + 1,
-    count: feedbacks?.filter(d => d.rating === i + 1).length || 0
-  }));
-
-  const sentimentDistribution = feedbacks?.reduce((acc, curr) => {
-    acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const pieData = Object.entries(sentimentDistribution || {}).map(([name, value]) => ({
-    name,
-    value
-  }));
+  const hasFeedbacks = feedbacks && feedbacks.length > 0;
+  const averageRating = hasFeedbacks 
+    ? feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / feedbacks.length
+    : 0;
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Análise de Satisfação</CardTitle>
+        <div className="flex items-center space-x-2 bg-blue-50 rounded px-3 py-1">
+          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+          <span className="font-medium">{hasFeedbacks ? averageRating.toFixed(1) : "N/A"}</span>
+          <span className="text-sm text-gray-500">/5</span>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="h-[300px]">
-            <h3 className="text-sm font-medium mb-4">Distribuição de Avaliações</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ratingDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="rating" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+        {hasFeedbacks ? (
+          <>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <RatingDistribution feedbacks={feedbacks} />
+              <SentimentDistribution feedbacks={feedbacks} />
+            </div>
+            <RecentComments feedbacks={feedbacks} />
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-medium mb-2">Nenhum feedback disponível</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Ainda não há dados de satisfação para análise. Os feedbacks dos clientes serão exibidos aqui assim que estiverem disponíveis.
+            </p>
+            <Button variant="outline">
+              Configurar Pesquisa de Satisfação
+            </Button>
           </div>
-
-          <div className="h-[300px]">
-            <h3 className="text-sm font-medium mb-4">Análise de Sentimentos</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => 
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                >
-                  {pieData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-4">Comentários Recentes</h3>
-          <div className="space-y-4 max-h-[300px] overflow-y-auto">
-            {feedbacks?.slice(0, 5).map((feedback, index) => (
-              <div 
-                key={index} 
-                className="p-4 border rounded-lg"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-lg font-medium">{feedback.rating}/5</span>
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    feedback.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
-                    feedback.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {feedback.sentiment}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">{feedback.comment}</p>
-                <span className="text-xs text-gray-500 mt-2 block">
-                  {new Date(feedback.created_at).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

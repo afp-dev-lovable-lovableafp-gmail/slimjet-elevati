@@ -4,35 +4,30 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminAuthSection from "@/components/sections/AdminAuthSection";
+import { logger } from "@/features/logging/logger";
 
 const AdminAuth = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("AdminAuth useEffect:", {
-      user,
-      profile,
-      loading,
-      isAdmin: profile?.is_admin
+    logger.info("auth", "AdminAuth useEffect:", {
+      userId: user?.id,
+      isAdmin: profile?.is_admin,
+      loading
     });
     
-    // Só redireciona quando:
-    // 1. Os dados não estão mais carregando (loading === false)
-    // 2. Temos um usuário (user !== null)
-    // 3. Temos um perfil carregado (profile !== null)
     if (!loading && user && profile) {
       if (profile.is_admin) {
-        console.log("Redirecionando admin para /manager-admin");
+        logger.info("auth", "Redirecionando admin para /manager-admin");
         navigate("/manager-admin", { replace: true });
       } else {
-        console.log("Usuário não é admin, redirecionando para /");
+        logger.info("auth", "Usuário não é admin, redirecionando para /");
         navigate("/", { replace: true });
       }
     }
   }, [user, profile, loading, navigate]);
 
-  // Se estiver carregando, mostra o formulário normalmente
   return (
     <>
       <Helmet>

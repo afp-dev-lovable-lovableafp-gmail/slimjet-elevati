@@ -5,19 +5,27 @@ import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import type { AuthFormProps } from "./types";
 
-const AuthForm = ({ isAdmin }: AuthFormProps) => {
+const AuthForm = ({ isAdmin, hideRegister }: AuthFormProps) => {
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleToggleMode = () => {
-    setIsRegistering(!isRegistering);
+    if (!hideRegister) {
+      setIsRegistering(!isRegistering);
+    }
   };
 
   return (
     <AuthFormWrapper>
-      {isRegistering ? (
-        <RegisterForm onToggleMode={handleToggleMode} />
+      {isRegistering && !hideRegister ? (
+        <RegisterForm 
+          onToggleMode={handleToggleMode} 
+          hideToggle={hideRegister}
+        />
       ) : (
-        <LoginForm onToggleMode={handleToggleMode} />
+        <LoginForm 
+          onToggleMode={handleToggleMode} 
+          hideToggle={hideRegister}
+        />
       )}
     </AuthFormWrapper>
   );

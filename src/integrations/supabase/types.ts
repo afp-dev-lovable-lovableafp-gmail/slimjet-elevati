@@ -804,6 +804,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_profile_by_id: {
+        Args: {
+          profile_id: string
+        }
+        Returns: {
+          id: string
+          full_name: string
+          is_admin: boolean
+        }[]
+      }
     }
     Enums: {
       appointment_status: "pending" | "confirmed" | "cancelled" | "completed"

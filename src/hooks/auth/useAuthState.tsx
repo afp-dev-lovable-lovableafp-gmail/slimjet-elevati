@@ -17,6 +17,7 @@ export const useAuthState = () => {
     profile: profile ?? null,
     loading: sessionStatus === 'pending' || profileStatus === 'loading',
     error: profileError,
-    authenticated: !!session?.user
+    authenticated: !!session?.user,
+    isAdmin: profile?.is_admin ?? false
   }), [session, profile, sessionStatus, profileStatus, profileError]);
 };

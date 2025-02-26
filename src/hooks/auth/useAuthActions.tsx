@@ -2,72 +2,85 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../use-toast";
-import { signInWithEmail, signUpWithEmail, signOutUser } from "@/services/auth";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { logger } from "@/utils/logger";
 
 export const useAuthActions = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const { error } = await signInWithEmail(email, password);
-      if (error) throw error;
-      return true;
-    } catch (error: any) {
-      console.error('[Auth] Erro no login:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: error.message,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
-      return false;
+
+      if (error) throw error;
+
+      logger.info("auth", "Login realizado com sucesso", {
+        userId: data.user?.id
+      });
+
+      return data;
+    } catch (error: any) {
+      logger.error("auth", "Erro no login", error);
+      toast("Erro no login", {
+        description: error.message || "Verifique suas credenciais e tente novamente."
+      });
+      return null;
     }
-  }, [toast]);
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, phone?: string) => {
     try {
-      const { error } = await signUpWithEmail(email, password, fullName, phone || '');
-      if (error) throw error;
-      return true;
-    } catch (error: any) {
-      console.error('[Auth] Erro no cadastro:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro no cadastro",
-        description: error.message,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone
+          }
+        }
       });
-      return false;
+
+      if (error) throw error;
+
+      logger.info("auth", "Cadastro realizado com sucesso", {
+        userId: data.user?.id
+      });
+
+      return data;
+    } catch (error: any) {
+      logger.error("auth", "Erro no cadastro", error);
+      toast("Erro no cadastro", {
+        description: error.message || "Não foi possível completar o cadastro. Tente novamente."
+      });
+      return null;
     }
-  }, [toast]);
+  }, []);
 
   const signOut = useCallback(async () => {
     try {
-      const { error } = await signOutUser();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
       await queryClient.clear();
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['session'] }),
-        queryClient.invalidateQueries({ queryKey: ['profile'] })
-      ]);
-
-      toast({
-        title: "Logout realizado com sucesso!",
-        description: "Até logo!",
-      });
+      logger.info("auth", "Logout realizado com sucesso");
       
       navigate('/', { replace: true });
+      toast("Logout realizado", {
+        description: "Até logo!"
+      });
     } catch (error: any) {
-      console.error('[Auth] Erro no logout:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao fazer logout",
-        description: error.message,
+      logger.error("auth", "Erro no logout", error);
+      toast("Erro ao fazer logout", {
+        description: error.message || "Não foi possível fazer logout. Tente novamente."
       });
     }
-  }, [queryClient, toast, navigate]);
+  }, [queryClient, navigate]);
 
   return {
     signIn,

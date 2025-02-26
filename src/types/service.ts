@@ -32,6 +32,26 @@ export interface Service {
 }
 
 /**
+ * Interface para operações com serviços
+ */
+export interface ServiceOperations {
+  // Estado do diálogo
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+  showDeleteDialog: boolean;
+  setShowDeleteDialog: (open: boolean) => void;
+
+  // Estado do serviço selecionado
+  selectedService: Service | null;
+  setSelectedService: (service: Service | null) => void;
+
+  // Operações
+  handleCreateOrUpdate: (service: Partial<Service>) => Promise<boolean>;
+  handleDelete: (serviceId: string) => Promise<boolean>;
+  toggleStatus: (service: Service) => Promise<void>;
+}
+
+/**
  * DTO para criação de um novo serviço
  */
 export interface CreateServiceDTO extends Omit<Service, 'id' | 'created_at' | 'updated_at'> {

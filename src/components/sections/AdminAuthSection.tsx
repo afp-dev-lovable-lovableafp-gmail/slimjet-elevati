@@ -92,7 +92,7 @@ const AdminAuthSection = () => {
             </div>
 
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              <AuthForm isAdmin />
+              <AuthForm isAdmin={true} hideRegister={true} />
             </div>
           </div>
         </motion.div>

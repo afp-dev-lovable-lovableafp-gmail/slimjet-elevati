@@ -1,132 +1,74 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, FileText } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
-
-interface CustomReport {
-  id: string;
-  name: string;
-  description: string | null;
-  report_config: any;
-  created_at: string;
-}
+import { Button } from "@/components/ui/button";
+import { FileText, ArrowUpRight } from "lucide-react";
+import { useCustomReports } from "@/hooks/useCustomReports";
+import { useNavigate } from "react-router-dom";
 
 const CustomReports = () => {
-  const [selectedReport, setSelectedReport] = useState<CustomReport | null>(null);
-  const { toast } = useToast();
-  const { user, profile } = useAuth();
-
-  // Redirect if not admin
-  if (!profile?.is_admin) {
-    return <Navigate to="/" />;
-  }
-
-  const { data: reports, isLoading, error } = useQuery({
-    queryKey: ['custom-reports'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('custom_reports')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching reports:', error);
-        toast({
-          variant: "destructive",
-          title: "Erro ao carregar relatórios",
-          description: "Houve um problema ao carregar os relatórios personalizados."
-        });
-        throw error;
-      }
-
-      return data as CustomReport[];
-    },
-  });
-
-  const renderReportContent = (report: CustomReport) => {
-    return (
-      <div className="space-y-4 animate-fade-in">
-        <p className="text-sm text-muted-foreground">
-          {report.description || "Sem descrição disponível"}
-        </p>
-        <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-          {JSON.stringify(report.report_config, null, 2)}
-        </pre>
-      </div>
-    );
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64" role="status">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="sr-only">Carregando relatórios...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500" role="alert">
-            Erro ao carregar relatórios. Por favor, tente novamente mais tarde.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const { reports, isLoading } = useCustomReports();
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+  
+  const displayReports = expanded ? reports : reports?.slice(0, 3);
 
   return (
-    <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-          <FileText className="h-6 w-6" />
-          Relatórios Customizados
-        </CardTitle>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle>Relatórios Personalizados</CardTitle>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate("/manager-admin/custom-reports")}
+        >
+          Ver todos
+          <ArrowUpRight className="ml-2 h-4 w-4" />
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {reports?.map((report) => (
-            <Card 
-              key={report.id}
-              className="cursor-pointer transition-all duration-300 hover:shadow-md bg-white dark:bg-gray-800"
-              onClick={() => setSelectedReport(
-                selectedReport?.id === report.id ? null : report
-              )}
-              tabIndex={0}
-              role="button"
-              aria-expanded={selectedReport?.id === report.id}
-              aria-controls={`report-content-${report.id}`}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setSelectedReport(selectedReport?.id === report.id ? null : report);
-                }
-              }}
-            >
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-2">{report.name}</h3>
-                <div
-                  id={`report-content-${report.id}`}
-                  className={selectedReport?.id === report.id ? 'block' : 'hidden'}
-                >
-                  {selectedReport?.id === report.id && renderReportContent(report)}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        {reports?.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum relatório personalizado encontrado
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-pulse h-6 w-24 bg-gray-200 rounded"></div>
           </div>
+        ) : (
+          <>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {displayReports?.map((report) => (
+                <Card key={report.id} className="bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start space-x-4">
+                      <div className="rounded-full bg-blue-100 p-2">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{report.name}</h3>
+                        <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                          {report.description || "Sem descrição"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {reports?.length > 3 && (
+              <Button 
+                variant="outline" 
+                className="w-full mt-4"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? "Ver menos" : `Ver mais ${reports.length - 3} relatórios`}
+              </Button>
+            )}
+
+            {reports?.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                Nenhum relatório personalizado encontrado
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
@@ -134,4 +76,3 @@ const CustomReports = () => {
 };
 
 export default CustomReports;
-

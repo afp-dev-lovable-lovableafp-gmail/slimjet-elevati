@@ -1,91 +1,65 @@
-
-import { Helmet } from "react-helmet";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Card } from "@/components/ui/card";
-import { Loader2, Calendar, UserCircle } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { WelcomeHeader } from "@/components/sections/dashboard/WelcomeHeader";
-import { FeatureCard } from "@/components/sections/dashboard/FeatureCard";
-import { BookingCTA } from "@/components/sections/dashboard/BookingCTA";
+
+const BookingCTA = ({ onBookingClick }: { onBookingClick: () => void }) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Agende sua Consultoria</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Marque uma conversa com nossos especialistas e impulsione seu negócio.
+        </p>
+        <Button className="mt-4" onClick={onBookingClick}>
+          Agendar Agora
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 const Dashboard = () => {
-  const { user, profile, loading, signOut } = useAuth();
-  const queryClient = useQueryClient();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignOut = async () => {
-    try {
-      await queryClient.clear();
-      await signOut();
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="p-8">
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Carregando...</span>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" />;
-  }
-
-  const features = [
-    {
-      icon: Calendar,
-      title: "Meus Agendamentos",
-      description: "Visualize e gerencie seus agendamentos",
-      action: "Ver Agendamentos",
-      onClick: () => navigate("/appointments")
-    },
-    {
-      icon: UserCircle,
-      title: "Meu Perfil",
-      description: "Atualize suas informações pessoais",
-      action: "Editar Perfil",
-      onClick: () => navigate("/perfil")
-    }
-  ];
-
   return (
-    <>
-      <Helmet>
-        <title>ElevaTI - Dashboard</title>
-        <meta 
-          name="description" 
-          content="Gerencie seus agendamentos e acesse seus serviços na ElevaTI." 
-        />
-      </Helmet>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4 py-8">
-          <WelcomeHeader 
-            profile={profile} 
-            onSignOut={handleSignOut} 
-          />
-
-          <div className="grid gap-8 md:grid-cols-2">
-            {features.map((feature, index) => (
-              <FeatureCard
-                key={index}
-                {...feature}
-              />
-            ))}
-          </div>
-
-          <BookingCTA onBookNow={() => navigate("/booking")} />
-        </div>
-      </div>
-    </>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Bem-vindo(a), {user?.user_metadata?.full_name || "Usuário"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Gerencie sua conta e veja seus agendamentos.
+          </p>
+          <Button className="mt-4" onClick={() => navigate("/perfil")}>
+            Editar Perfil
+          </Button>
+          <Button variant="destructive" className="mt-4 ml-2" onClick={signOut}>
+            Sair
+          </Button>
+        </CardContent>
+      </Card>
+      
+      <BookingCTA onBookingClick={() => navigate("/booking")} />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Meus Agendamentos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Acompanhe seus horários e veja o status dos seus agendamentos.
+          </p>
+          <Button className="mt-4" onClick={() => navigate("/appointments")}>
+            Ver Agendamentos
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

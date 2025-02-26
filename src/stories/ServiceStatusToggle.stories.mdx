@@ -1,0 +1,55 @@
+
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs';
+import { ServiceStatusToggle } from '@/components/admin/services/ServiceStatusToggle';
+
+<Meta
+  title="Admin/Services/ServiceStatusToggle"
+  component={ServiceStatusToggle}
+  parameters={{
+    layout: 'centered',
+  }}
+/>
+
+# ServiceStatusToggle
+
+O componente ServiceStatusToggle é usado para alternar o status de um serviço entre ativo e inativo.
+
+## Uso Básico
+
+<Canvas>
+  <Story name="Active">
+    {(args) => <ServiceStatusToggle isActive={true} setIsActive={() => {}} />}
+  </Story>
+</Canvas>
+
+## Estados
+
+### Inativo
+
+<Canvas>
+  <Story name="Inactive">
+    {(args) => <ServiceStatusToggle isActive={false} setIsActive={() => {}} />}
+  </Story>
+</Canvas>
+
+## Propriedades
+
+<ArgsTable of={ServiceStatusToggle} />
+
+## Teste Interativo
+
+<Canvas>
+  <Story
+    name="Interactive"
+    args={{
+      isActive: true,
+      setIsActive: () => {},
+    }}
+    play={async ({ canvasElement, args }) => {
+      const canvas = within(canvasElement);
+      const toggle = canvas.getByRole('switch');
+      await userEvent.click(toggle);
+      await expect(toggle).toBeInTheDocument();
+    }}
+  />
+</Canvas>

@@ -13,6 +13,7 @@ interface RegisterFieldsProps {
 export const RegisterFields: React.FC<RegisterFieldsProps> = ({
   register,
   errors,
+  watch
 }) => {
   const formatPhoneNumber = (value: string) => {
     // Remove todos os caracteres não numéricos

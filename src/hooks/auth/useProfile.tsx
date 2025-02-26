@@ -26,17 +26,30 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
 
     try {
       setStatus('loading');
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      
+      // Primeiro, buscar dados básicos usando a função otimizada
+      const { data: adminData, error: adminError } = await supabase
+        .rpc('get_profile_by_id', { profile_id: userId });
 
-      if (error) throw error;
+      if (adminError) throw adminError;
 
-      setProfile(data);
-      setStatus('success');
-      setError(null);
+      // Se encontrou dados básicos, buscar o perfil completo
+      if (adminData && adminData.length > 0) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+
+        setProfile(profileData);
+        setStatus('success');
+        setError(null);
+      } else {
+        setProfile(null);
+        setStatus('success');
+      }
     } catch (err) {
       console.error('[Auth] Erro ao carregar perfil:', err);
       setStatus('error');

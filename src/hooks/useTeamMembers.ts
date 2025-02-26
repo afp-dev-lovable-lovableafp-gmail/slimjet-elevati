@@ -4,57 +4,48 @@ import { useTeamMemberQueries } from "./team/useTeamMemberQueries";
 import { useTeamMemberMutations } from "./team/useTeamMemberMutations";
 import { useTeamMemberState } from "./team/useTeamMemberState";
 import { useSpecialtyState } from "./team/useSpecialtyState";
+import { useTeamMemberActions } from "./team/useTeamMemberActions";
 import type { TeamMember } from "@/types/team";
 
 export const useTeamMembers = () => {
   const { data: members, isLoading, error, refetch } = useTeamMemberQueries();
   const { deleteMember } = useTeamMemberMutations();
-  const {
-    isFormOpen,
-    setIsFormOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    selectedMember,
-    setSelectedMember,
-    openForm,
-    closeForm,
-    openDeleteDialog,
-    closeDeleteDialog,
-  } = useTeamMemberState();
-  
-  const {
-    isSpecialtyFormOpen,
-    setIsSpecialtyFormOpen,
-    selectedSpecialty,
-    setSelectedSpecialty,
-  } = useSpecialtyState();
+  const memberState = useTeamMemberState();
+  const specialtyState = useSpecialtyState();
+  const { handleEdit } = useTeamMemberActions(refetch);
 
   const handleDelete = useCallback(async (memberId: string) => {
     await deleteMember.mutateAsync(memberId);
-    closeDeleteDialog();
-  }, [deleteMember, closeDeleteDialog]);
-
-  const handleEdit = useCallback((member: TeamMember) => {
-    setSelectedMember(member);
-    openForm();
-  }, [setSelectedMember, openForm]);
+    memberState.closeDeleteDialog();
+  }, [deleteMember, memberState.closeDeleteDialog]);
 
   return {
+    // Data
     members,
     isLoading,
     error,
     refetch,
-    isFormOpen,
-    setIsFormOpen,
-    selectedMember,
-    setSelectedMember,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    isSpecialtyFormOpen,
-    setIsSpecialtyFormOpen,
-    selectedSpecialty,
-    setSelectedSpecialty,
+    
+    // Form state
+    isFormOpen: memberState.isFormOpen,
+    selectedMember: memberState.selectedMember,
+    
+    // Dialog state
+    isDeleteDialogOpen: memberState.isDeleteDialogOpen,
+    
+    // Specialty state
+    isSpecialtyFormOpen: specialtyState.isSpecialtyFormOpen,
+    selectedSpecialty: specialtyState.selectedSpecialty,
+    
+    // Actions
     handleEdit,
-    handleDelete
+    handleDelete,
+    
+    // State setters
+    setIsFormOpen: memberState.setIsFormOpen,
+    setSelectedMember: memberState.setSelectedMember,
+    setIsDeleteDialogOpen: memberState.setIsDeleteDialogOpen,
+    setIsSpecialtyFormOpen: specialtyState.setIsSpecialtyFormOpen,
+    setSelectedSpecialty: specialtyState.setSelectedSpecialty
   };
 };

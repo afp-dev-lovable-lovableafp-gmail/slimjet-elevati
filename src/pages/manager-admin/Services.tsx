@@ -89,7 +89,11 @@ const Services = () => {
       <DeleteServiceDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
+        onConfirm={() => {
+          if (selectedService?.id) {
+            handleDelete(selectedService.id);
+          }
+        }}
       />
 
       <ManageTagsDialog

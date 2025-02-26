@@ -1,5 +1,5 @@
 
-export type LogLevel = 'info' | 'warning' | 'error';
+export type LogLevel = 'info' | 'warning' | 'error' | 'critical';
 export type LogContext = Record<string, unknown>;
 
 export interface LogEntry {

@@ -4,12 +4,37 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import type { MetricTrend } from "@/types/analytics";
 
 interface MetricsCardProps {
+  /** Título do cartão de métrica */
   title: string;
+  /** Valor numérico ou texto a ser exibido */
   value: string | number;
+  /** Tendência da métrica (opcional) */
   trend?: MetricTrend;
+  /** Descrição adicional da métrica (opcional) */
   description?: string;
 }
 
+/**
+ * Componente para exibição de métricas em um cartão.
+ * Exibe um valor com título, tendência opcional e descrição.
+ * 
+ * @example
+ * ```tsx
+ * // Métrica básica
+ * <MetricsCard 
+ *   title="Vendas Totais" 
+ *   value="R$ 15.000" 
+ * />
+ * 
+ * // Métrica com tendência e descrição
+ * <MetricsCard 
+ *   title="Crescimento" 
+ *   value={15} 
+ *   trend="up"
+ *   description="Comparado ao mês anterior"
+ * />
+ * ```
+ */
 const MetricsCard = ({ title, value, trend, description }: MetricsCardProps) => {
   return (
     <Card>

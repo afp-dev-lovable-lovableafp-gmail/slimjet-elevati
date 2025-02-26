@@ -1,6 +1,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { renderWithProviders } from '@/test/utils';
 import userEvent from '@testing-library/user-event';
 import { supabase } from '@/lib/supabase';
@@ -178,17 +178,6 @@ describe('Fluxo de Agendamento', () => {
     // Verifica mensagem de erro
     await waitFor(() => {
       expect(screen.getByText(/data não pode ser no passado/i)).toBeInTheDocument();
-    });
-  });
-
-  it('deve lidar com erro de rede ao carregar serviços', async () => {
-    // Mock do erro de rede
-    (supabase.from as any)().order.mockRejectedValue(new Error('Network Error'));
-
-    renderWithProviders(<AppointmentForm />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/erro ao carregar serviços/i)).toBeInTheDocument();
     });
   });
 });

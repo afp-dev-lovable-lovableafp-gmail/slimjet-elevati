@@ -9,15 +9,31 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { StarIcon } from "lucide-react";
 
 interface FeedbackFormProps {
+  /** ID do agendamento relacionado ao feedback */
   appointmentId: string;
+  /** Função chamada após envio bem-sucedido do feedback */
   onSuccess?: () => void;
 }
 
 interface FeedbackInput {
+  /** Avaliação numérica (1-5) */
   rating: number;
+  /** Comentário opcional do usuário */
   comment: string;
 }
 
+/**
+ * Formulário para coleta de feedback dos usuários após um serviço.
+ * Permite avaliação por estrelas (1-5) e comentários opcionais.
+ * 
+ * @example
+ * ```tsx
+ * <FeedbackForm 
+ *   appointmentId="123"
+ *   onSuccess={() => console.log('Feedback enviado!')}
+ * />
+ * ```
+ */
 export const FeedbackForm = ({ appointmentId, onSuccess }: FeedbackFormProps) => {
   const [rating, setRating] = useState(0);
   const { register, handleSubmit } = useForm<FeedbackInput>();

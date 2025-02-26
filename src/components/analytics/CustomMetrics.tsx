@@ -1,99 +1,68 @@
 
-import { useState } from "react";
-import { useCustomMetrics } from "@/hooks/analytics/useCustomMetrics";
-import { Card } from "@/components/ui/card";
-import MetricsCard from "./MetricsCard";
-import { CustomMetricsGrid } from "./metrics/CustomMetricsGrid";
-import CustomMetricsHeader from "./metrics/CustomMetricsHeader";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { CustomMetric, MetricTrend } from "@/types/analytics";
+import { useCustomMetrics } from "@/hooks/useCustomMetrics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartBar, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { MetricCard } from "@/components/analytics/metrics/MetricCard";
 
-export const CustomMetrics = () => {
-  const { metrics, isLoading, error } = useCustomMetrics();
-  const [selectedType, setSelectedType] = useState<string>("all");
-
-  const getTrend = (value: number | null): MetricTrend => {
-    if (!value) return "neutral";
-    if (value > 0) return "up";
-    if (value < 0) return "down";
-    return "neutral";
-  };
-
-  const metricTypes = Array.from(new Set(metrics.map(m => m.category || "Outros")));
-
-  if (error) {
-    return (
-      <Card className="p-6">
-        <div className="text-red-500">
-          Erro ao carregar métricas: {error.message}
-        </div>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-1/3" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (!metrics.length) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-gray-500">
-          Nenhuma métrica personalizada encontrada.
-        </div>
-      </Card>
-    );
-  }
-
-  const filteredMetrics = selectedType === "all" 
-    ? metrics 
-    : metrics.filter(m => m.category === selectedType);
-
-  const groupedMetrics = filteredMetrics.reduce((acc, metric) => {
-    const category = metric.category || 'Outros';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(metric);
-    return acc;
-  }, {} as Record<string, CustomMetric[]>);
+const CustomMetrics = () => {
+  const { metrics, isLoading } = useCustomMetrics();
+  const navigate = useNavigate();
+  
+  const activeMetrics = metrics?.filter(metric => metric.is_active) || [];
 
   return (
-    <div className="space-y-6">
-      <CustomMetricsHeader 
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        metricTypes={["all", ...metricTypes]}
-      />
-      
-      {Object.entries(groupedMetrics).map(([category, categoryMetrics]) => (
-        <div key={category} className="space-y-4">
-          <h3 className="text-lg font-semibold">{category}</h3>
-          <CustomMetricsGrid>
-            {categoryMetrics.map((metric) => (
-              <MetricsCard
-                key={metric.id}
-                title={metric.name}
-                value={metric.value ?? "N/A"}
-                description={metric.description || ""}
-                trend={getTrend(metric.change_percentage)}
-              />
-            ))}
-          </CustomMetricsGrid>
-        </div>
-      ))}
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle>Métricas Personalizadas</CardTitle>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate("/manager-admin/custom-metrics")}
+        >
+          Gerenciar
+          <ArrowUpRight className="ml-2 h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-pulse h-6 w-24 bg-gray-200 rounded"></div>
+          </div>
+        ) : (
+          <>
+            {activeMetrics.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {activeMetrics.map((metric) => (
+                  <MetricCard
+                    key={metric.id}
+                    name={metric.name}
+                    description={metric.description || ""}
+                    value={Math.round(Math.random() * 100)} // Simulação de valor
+                    trend={Math.random() > 0.5 ? Math.random() * 15 : -Math.random() * 15} // Simulação de tendência
+                    metricType={metric.metric_type}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <ChartBar className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                <p>Nenhuma métrica personalizada configurada</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4"
+                  onClick={() => navigate("/manager-admin/custom-metrics")}
+                >
+                  Criar nova métrica
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

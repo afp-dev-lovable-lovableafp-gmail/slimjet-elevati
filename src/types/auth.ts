@@ -25,6 +25,7 @@ export interface AuthState {
   loading: boolean;
   error: Error | null;
   authenticated: boolean;
+  isAdmin?: boolean;
 }
 
 export interface AuthFormData {

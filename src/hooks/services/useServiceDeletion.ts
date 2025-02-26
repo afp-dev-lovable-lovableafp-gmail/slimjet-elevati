@@ -1,40 +1,29 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/hooks/use-toast";
+import { handleError } from "@/utils/error-handler";
+import { toast } from "sonner";
 import type { Service } from "@/types/service";
 
 export const useServiceDeletion = (refetch: () => void) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const { toast } = useToast();
 
-  const handleDelete = async () => {
-    if (!selectedService) return;
-
+  const handleDelete = async (serviceId: string) => {
     try {
       const { error } = await supabase
         .from('services')
         .delete()
-        .eq('id', selectedService.id);
+        .eq('id', serviceId);
 
       if (error) throw error;
 
-      toast({
-        title: "Serviço excluído",
-        description: "O serviço foi excluído com sucesso.",
-      });
-
+      toast.success("Serviço excluído com sucesso");
       setShowDeleteDialog(false);
       setSelectedService(null);
       refetch();
     } catch (error) {
-      console.error('Erro ao excluir serviço:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao excluir o serviço.",
-      });
+      handleError(error, "Erro ao excluir serviço");
     }
   };
 
@@ -43,6 +32,6 @@ export const useServiceDeletion = (refetch: () => void) => {
     setShowDeleteDialog,
     selectedService,
     setSelectedService,
-    handleDelete,
+    handleDelete
   };
 };

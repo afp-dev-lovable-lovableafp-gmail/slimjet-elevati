@@ -44,8 +44,8 @@ export interface PageVisit {
   count: number;
   visit_date: string;
   visit_hour: number;
-  created_at: string;
-  updated_at: string | null;
+  created_at?: string;
+  updated_at?: string | null;
 }
 
 export interface PopularService {
@@ -59,22 +59,22 @@ export interface PopularService {
 export interface FeedbackData {
   id: string;
   rating: number;
-  comment: string | null;
-  sentiment: string | null;
+  comment?: string | null;
+  sentiment?: string | null;
   created_at: string;
-  updated_at: string | null;
-  appointment_id: string | null;
-  user_id: string | null;
+  updated_at?: string | null;
+  appointment_id?: string | null;
+  user_id?: string | null;
 }
 
 export interface NpsData {
   id: string;
   score: number;
-  category: string | null;
-  feedback: string | null;
+  category?: string | null;
+  feedback?: string | null;
   created_at: string;
-  updated_at: string | null;
-  user_id: string | null;
+  updated_at?: string | null;
+  user_id?: string | null;
 }
 
 export interface SiteAnalytics {
@@ -82,4 +82,15 @@ export interface SiteAnalytics {
   popularServices: PopularService[];
   feedbacks: FeedbackData[];
   npsData: NpsData[];
+}
+
+export interface AnalyticsMetrics {
+  totalPageViews: number;
+  totalServices: number;
+  averageRating: number;
+  npsScore: number;
+}
+
+export interface AnalyticsResponse extends SiteAnalytics {
+  metrics?: AnalyticsMetrics;
 }

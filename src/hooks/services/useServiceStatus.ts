@@ -1,7 +1,7 @@
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { handleError } from "@/utils/error-handler";
 import type { Service } from "@/types/service";
 
 export const useServiceStatus = (refetch: () => void) => {
@@ -23,16 +23,9 @@ export const useServiceStatus = (refetch: () => void) => {
 
       refetch();
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao atualizar o status do serviço.",
-      });
+      handleError(error, 'Erro ao atualizar status do serviço');
     }
   };
 
-  return {
-    toggleStatus,
-  };
+  return { toggleStatus };
 };

@@ -1,7 +1,7 @@
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { LucideIcon } from "lucide-react";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -11,12 +11,12 @@ interface FeatureCardProps {
   onClick: () => void;
 }
 
-export const FeatureCard = ({
-  icon: Icon,
-  title,
-  description,
-  action,
-  onClick
+export const FeatureCard = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  action, 
+  onClick 
 }: FeatureCardProps) => {
   return (
     <Card className="p-6 transition-all hover:shadow-lg">

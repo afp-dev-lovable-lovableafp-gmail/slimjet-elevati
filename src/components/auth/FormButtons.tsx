@@ -1,46 +1,35 @@
 
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
-
-interface FormButtonsProps {
-  isSubmitting: boolean;
-  isRegistering: boolean;
-  isAdmin?: boolean;
-  onToggleMode: () => void;
-}
+import type { FormButtonsProps } from "./types";
 
 export const FormButtons: React.FC<FormButtonsProps> = ({
   isSubmitting,
   isRegistering,
-  isAdmin,
   onToggleMode,
+  hideToggle
 }) => {
   return (
-    <>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? (
-          "Processando..."
-        ) : isRegistering ? (
-          "Criar conta"
-        ) : (
-          "Entrar"
-        )}
-        <ChevronRight className="h-4 w-4 ml-2" />
+    <div className="space-y-4">
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Carregando..." : isRegistering ? "Cadastrar" : "Entrar"}
       </Button>
 
-      {!isAdmin && (
+      {!hideToggle && (
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
           className="w-full"
           onClick={onToggleMode}
         >
           {isRegistering
-            ? "Já tem uma conta? Entre"
+            ? "Já tem uma conta? Entre aqui"
             : "Não tem uma conta? Cadastre-se"}
         </Button>
       )}
-    </>
+    </div>
   );
 };

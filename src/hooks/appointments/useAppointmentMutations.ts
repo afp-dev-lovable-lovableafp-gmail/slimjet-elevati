@@ -5,10 +5,18 @@ import { handleError } from "@/features/error/error-handler";
 import { logger } from "@/features/logging/logger";
 import { ErrorCodes } from "@/features/error/types";
 import type { CreateAppointmentDTO, UpdateAppointmentDTO } from "@/types/appointment";
+import type { PostgrestError } from "@supabase/supabase-js";
 
 export const useAppointmentMutations = (userId?: string) => {
   const queryClient = useQueryClient();
   const MODULE = 'appointments';
+
+  const formatErrorContext = (error: PostgrestError) => ({
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code
+  });
 
   const createAppointment = useMutation({
     mutationFn: async (data: CreateAppointmentDTO) => {
@@ -22,7 +30,7 @@ export const useAppointmentMutations = (userId?: string) => {
         });
 
       if (error) {
-        logger.error(MODULE, 'Failed to create appointment', { error });
+        logger.error(MODULE, 'Failed to create appointment', formatErrorContext(error));
         throw error;
       }
     },
@@ -48,7 +56,7 @@ export const useAppointmentMutations = (userId?: string) => {
         .eq('id', data.id);
 
       if (error) {
-        logger.error(MODULE, 'Failed to update appointment', { error });
+        logger.error(MODULE, 'Failed to update appointment', formatErrorContext(error));
         throw error;
       }
     },
@@ -74,7 +82,7 @@ export const useAppointmentMutations = (userId?: string) => {
         .eq('id', id);
 
       if (error) {
-        logger.error(MODULE, 'Failed to cancel appointment', { error });
+        logger.error(MODULE, 'Failed to cancel appointment', formatErrorContext(error));
         throw error;
       }
     },
