@@ -27,36 +27,59 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
 
     try {
       setStatus('loading');
-      
-      // Usar a função RPC otimizada para verificar se é admin primeiro
-      const { data: isAdmin, error: adminError } = await supabase
-        .rpc('check_if_admin', { user_id: userId });
 
-      if (adminError) throw adminError;
-
-      // Buscar o perfil completo
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw profileError;
+      }
 
       if (profileData) {
+        // After getting profile, check admin status
+        const { data: isAdmin, error: adminError } = await supabase
+          .rpc('check_if_admin', { user_id: userId });
+        
+        if (adminError) {
+          logger.warn("auth", "Erro ao verificar status de admin", { 
+            error: adminError,
+            userId 
+          });
+        }
+
         setProfile({
           ...profileData,
-          is_admin: isAdmin
+          is_admin: isAdmin || false
         });
         setStatus('success');
         setError(null);
       } else {
-        setProfile(null);
-        setStatus('success');
+        // If no profile exists yet, create one
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([{ id: userId }])
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        if (newProfile) {
+          setProfile({
+            ...newProfile,
+            is_admin: false
+          });
+          setStatus('success');
+          setError(null);
+        }
       }
     } catch (err) {
       const error = err as Error;
-      logger.error('auth', 'Erro ao carregar perfil:', { error });
+      logger.error("auth", "Erro ao carregar perfil:", { error });
       setStatus('error');
       setError(error);
     }
