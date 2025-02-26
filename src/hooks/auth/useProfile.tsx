@@ -28,23 +28,24 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
     try {
       setStatus('loading');
 
+      // First try to get the existing profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
 
+      // If profile exists, check admin status
       if (profileData) {
-        // After getting profile, check admin status
         const { data: isAdmin, error: adminError } = await supabase
           .rpc('check_if_admin', { user_id: userId });
         
         if (adminError) {
-          logger.warn("auth", "Erro ao verificar status de admin", { 
+          logger.warn("auth", "Error checking admin status", { 
             error: adminError,
             userId 
           });
@@ -57,10 +58,13 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
         setStatus('success');
         setError(null);
       } else {
-        // If no profile exists yet, create one
+        // If no profile exists, create one
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .insert([{ id: userId }])
+          .insert([{ 
+            id: userId,
+            is_admin: false
+          }])
           .select()
           .single();
 
@@ -79,7 +83,7 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
       }
     } catch (err) {
       const error = err as Error;
-      logger.error("auth", "Erro ao carregar perfil:", { error });
+      logger.error("auth", "Error loading profile:", { error });
       setStatus('error');
       setError(error);
     }
