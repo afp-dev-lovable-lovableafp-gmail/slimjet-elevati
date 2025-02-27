@@ -1,13 +1,13 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Profile, Client } from "@/types/auth";
+import { logger } from "@/utils/logger";
+import type { Profile } from "@/types/auth";
 
 export type ProfileStatus = 'idle' | 'loading' | 'error' | 'success';
 
 interface UseProfileResult {
   profile: Profile | null;
-  client: Client | null;
   status: ProfileStatus;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -15,49 +15,87 @@ interface UseProfileResult {
 
 export const useProfile = (userId: string | undefined): UseProfileResult => {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [client, setClient] = useState<Client | null>(null);
   const [status, setStatus] = useState<ProfileStatus>('idle');
   const [error, setError] = useState<Error | null>(null);
 
   const fetchProfile = async () => {
     if (!userId) {
       setProfile(null);
-      setClient(null);
       setStatus('success');
       return;
     }
 
     try {
       setStatus('loading');
-      
-      // Buscar perfil
+
+      // Primeiro tenta obter o perfil existente
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (profileError) throw profileError;
-      
-      // Buscar cliente
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', userId)
-        .single();
-        
-      if (clientError && clientError.code !== "PGRST116") {
-        throw clientError;
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
       }
 
-      setProfile(profileData);
-      setClient(clientData || null);
-      setStatus('success');
-      setError(null);
+      if (profileData) {
+        // Converte os dados do banco para o tipo Profile
+        const userProfile: Profile = {
+          id: profileData.id,
+          is_admin: profileData.is_admin || false,
+          user_type: profileData.user_type || 'client',
+          full_name: profileData.full_name || '',
+          company_name: profileData.company_name || null,
+          phone: profileData.phone || null,
+          avatar_url: profileData.avatar_url || null,
+          created_at: profileData.created_at,
+          updated_at: profileData.updated_at
+        };
+        
+        setProfile(userProfile);
+        setStatus('success');
+        setError(null);
+      } else {
+        // Se não existir perfil, cria um novo
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: userId,
+            is_admin: false,
+            user_type: 'client'
+          }])
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        if (newProfile) {
+          // Converte os dados do novo perfil para o tipo Profile
+          const userProfile: Profile = {
+            id: newProfile.id,
+            is_admin: newProfile.is_admin || false,
+            user_type: newProfile.user_type || 'client',
+            full_name: newProfile.full_name || '',
+            company_name: newProfile.company_name || null,
+            phone: newProfile.phone || null,
+            avatar_url: newProfile.avatar_url || null,
+            created_at: newProfile.created_at,
+            updated_at: newProfile.updated_at
+          };
+          
+          setProfile(userProfile);
+          setStatus('success');
+          setError(null);
+        }
+      }
     } catch (err) {
-      console.error('[Auth] Erro ao carregar perfil:', err);
+      const error = err as Error;
+      logger.error("auth", "Error loading profile:", { error });
       setStatus('error');
-      setError(err as Error);
+      setError(error);
     }
   };
 
@@ -67,7 +105,6 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
 
   return {
     profile,
-    client,
     status,
     error,
     refetch: fetchProfile

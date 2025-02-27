@@ -11,7 +11,7 @@ export interface Appointment {
   updated_at?: string | null;
   // Relacionamentos opcionais
   services?: Service;
-  profiles?: ClientInfo;
+  profiles?: ClientInfo | null;
 }
 
 export type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed";

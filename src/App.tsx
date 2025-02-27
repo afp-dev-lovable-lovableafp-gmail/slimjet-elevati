@@ -52,7 +52,7 @@ const PublicLayout = () => {
 };
 
 // Helper de redirecionamento
-function redirect(to: string) {
+function redirect(to) {
   return { redirect: to };
 }
 
@@ -89,8 +89,8 @@ const router = createBrowserRouter([
     element: <Auth />,
     loader: async () => {
       // Se o usuário já estiver logado, redirecionar para o dashboard
-      const session = await supabase.auth.getSession();
-      if (session.data.session) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
         return redirect('/client/dashboard');
       }
       return null;

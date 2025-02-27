@@ -1,67 +1,35 @@
 
-import type { User } from "@supabase/supabase-js";
+import { User } from '@supabase/supabase-js';
 
 export interface Profile {
   id: string;
-  auth_id?: string;
-  is_admin: boolean | null;
-  user_type: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-  // Campos opcionais do profile que podem vir do cliente
-  full_name?: string | null;
-  company_name?: string | null;
-  phone?: string | null;
-  avatar_url?: string | null;
-  email?: string | null;
-}
-
-export interface Client {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
+  is_admin: boolean;
+  user_type: string;
+  full_name: string;
   company_name: string | null;
   phone: string | null;
-  email: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
+  avatar_url: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AuthFormData {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  fullName?: string;
+  phone?: string;
 }
 
 export interface AuthState {
   user: User | null;
   profile: Profile | null;
-  client: Client | null;
   loading: boolean;
-  error: Error | null;
+  initialized: boolean;
   authenticated: boolean;
-  isAdmin?: boolean;
-  isTeamMember?: boolean;
-  isClient?: boolean;
 }
 
-export interface AuthFormData {
-  email?: string;
-  password?: string;
-  fullName?: string;
-  phone?: string;
-  confirmPassword?: string;
-}
-
-export interface AuthFormProps {
-  isAdmin?: boolean;
-}
-
-export interface AuthContextType {
-  user: User | null;
-  profile: Profile | null;
-  client: Client | null;
-  loading: boolean;
-  authenticated: boolean;
-  isAdmin?: boolean;
-  isTeamMember?: boolean;
-  isClient?: boolean;
-  error: Error | null;
-  signIn: (email: string, password: string) => Promise<any>;
-  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<any>;
-  signOut: () => Promise<void>;
+export interface OAuthLoginParams {
+  provider: 'google' | 'github' | 'facebook';
+  redirectTo?: string;
 }
