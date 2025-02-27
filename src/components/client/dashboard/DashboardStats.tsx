@@ -37,7 +37,7 @@ const DashboardStats = ({ pendingAppointments, completedAppointments }: Dashboar
               </div>
               <p className="text-xs text-muted-foreground">
                 {new Date(pendingAppointments[0].scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
-                - {pendingAppointments[0].service?.name || 'Consulta'}
+                - {pendingAppointments[0].services?.name || 'Consulta'}
               </p>
             </>
           ) : (

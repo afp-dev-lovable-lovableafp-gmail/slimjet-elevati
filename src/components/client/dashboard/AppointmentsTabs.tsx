@@ -65,7 +65,7 @@ const AppointmentRow = ({ appointment }: { appointment: Appointment }) => {
     <TableRow>
       <TableCell>{date}</TableCell>
       <TableCell>{time}</TableCell>
-      <TableCell>{appointment.service?.name || 'Consulta não especificada'}</TableCell>
+      <TableCell>{appointment.services?.name || 'Consulta não especificada'}</TableCell>
       <TableCell>{getStatusBadge(appointment.status)}</TableCell>
       <TableCell>
         <Button variant="ghost" size="sm" asChild>
