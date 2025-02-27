@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { logger } from "@/utils/logger";
-import type { Profile } from "@/types/auth";
+import type { Profile, Client } from "@/types/auth";
 
 export type ProfileStatus = 'idle' | 'loading' | 'error' | 'success';
 
 interface UseProfileResult {
   profile: Profile | null;
+  client: Client | null;
   status: ProfileStatus;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -15,12 +16,14 @@ interface UseProfileResult {
 
 export const useProfile = (userId: string | undefined): UseProfileResult => {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
   const [status, setStatus] = useState<ProfileStatus>('idle');
   const [error, setError] = useState<Error | null>(null);
 
   const fetchProfile = async () => {
     if (!userId) {
       setProfile(null);
+      setClient(null);
       setStatus('success');
       return;
     }
@@ -39,6 +42,17 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
         throw profileError;
       }
 
+      // Também busca os dados do cliente
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (clientError && clientError.code !== 'PGRST116') {
+        throw clientError;
+      }
+
       if (profileData) {
         // Converte os dados do banco para o tipo Profile
         const userProfile: Profile = {
@@ -54,8 +68,6 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
         };
         
         setProfile(userProfile);
-        setStatus('success');
-        setError(null);
       } else {
         // Se não existir perfil, cria um novo
         const { data: newProfile, error: insertError } = await supabase
@@ -87,10 +99,27 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
           };
           
           setProfile(userProfile);
-          setStatus('success');
-          setError(null);
         }
       }
+      
+      // Atualiza o cliente se existir
+      if (clientData) {
+        const userClient: Client = {
+          id: clientData.id,
+          full_name: clientData.full_name || '',
+          company_name: clientData.company_name || null,
+          phone: clientData.phone || null,
+          avatar_url: clientData.avatar_url || null,
+          email: clientData.email || null,
+          created_at: clientData.created_at,
+          updated_at: clientData.updated_at
+        };
+        
+        setClient(userClient);
+      }
+      
+      setStatus('success');
+      setError(null);
     } catch (err) {
       const error = err as Error;
       logger.error("auth", "Error loading profile:", { error });
@@ -105,6 +134,7 @@ export const useProfile = (userId: string | undefined): UseProfileResult => {
 
   return {
     profile,
+    client,
     status,
     error,
     refetch: fetchProfile

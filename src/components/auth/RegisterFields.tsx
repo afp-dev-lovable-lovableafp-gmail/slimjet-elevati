@@ -2,13 +2,7 @@
 import React from "react";
 import { UseFormRegister, UseFormWatch, FieldErrors } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { AuthFormData } from "@/types/auth";
-
-interface RegisterFieldsProps {
-  register: UseFormRegister<AuthFormData>;
-  errors: FieldErrors<AuthFormData>;
-  watch: UseFormWatch<AuthFormData>;
-}
+import { RegisterFieldsProps } from "./types";
 
 export const RegisterFields: React.FC<RegisterFieldsProps> = ({
   register,
@@ -42,7 +36,7 @@ export const RegisterFields: React.FC<RegisterFieldsProps> = ({
           autoComplete="name"
         />
         {errors.fullName && (
-          <span className="text-sm text-red-500">{errors.fullName.message}</span>
+          <span className="text-sm text-red-500">{errors.fullName.message as string}</span>
         )}
       </div>
       <div>
@@ -59,7 +53,7 @@ export const RegisterFields: React.FC<RegisterFieldsProps> = ({
           maxLength={14}
         />
         {errors.phone && (
-          <span className="text-sm text-red-500">{errors.phone.message}</span>
+          <span className="text-sm text-red-500">{errors.phone.message as string}</span>
         )}
       </div>
       <div>
@@ -76,7 +70,7 @@ export const RegisterFields: React.FC<RegisterFieldsProps> = ({
           autoComplete="email"
         />
         {errors.email && (
-          <span className="text-sm text-red-500">{errors.email.message}</span>
+          <span className="text-sm text-red-500">{errors.email.message as string}</span>
         )}
       </div>
       <div>
@@ -93,7 +87,7 @@ export const RegisterFields: React.FC<RegisterFieldsProps> = ({
           autoComplete="new-password"
         />
         {errors.password && (
-          <span className="text-sm text-red-500">{errors.password.message}</span>
+          <span className="text-sm text-red-500">{errors.password.message as string}</span>
         )}
       </div>
       <div>
@@ -108,7 +102,7 @@ export const RegisterFields: React.FC<RegisterFieldsProps> = ({
           autoComplete="new-password"
         />
         {errors.confirmPassword && (
-          <span className="text-sm text-red-500">{errors.confirmPassword.message}</span>
+          <span className="text-sm text-red-500">{errors.confirmPassword.message as string}</span>
         )}
       </div>
     </>

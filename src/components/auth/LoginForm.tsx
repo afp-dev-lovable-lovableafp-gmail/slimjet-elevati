@@ -2,13 +2,20 @@
 import { Button } from "@/components/ui/button";
 import { LoginFields } from "@/components/auth/LoginFields";
 import { Loader2 } from "lucide-react";
-import { AuthFormData } from "@/types/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authSchema } from "@/validations/schemas";
+import { z } from "zod";
+
+// Definindo o schema específico para o LoginForm
+const loginSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
-  onSubmit: (data: AuthFormData) => Promise<void>;
+  onSubmit: (data: LoginFormData) => Promise<void>;
   isLoading: boolean;
   onToggleMode: () => void;
   hideToggle?: boolean;
@@ -24,8 +31,8 @@ export const LoginForm = ({
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: ""

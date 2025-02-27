@@ -1,16 +1,22 @@
 
-import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { AuthFormData } from "@/types/auth";
+import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 
 export interface AuthFormProps {
   isAdmin?: boolean;
   hideRegister?: boolean;
 }
 
+// Tipo genérico para compatibilidade com diferentes formulários
 export interface LoginFieldsProps {
-  register: UseFormRegister<AuthFormData>;
-  errors: FieldErrors<AuthFormData>;
+  register: UseFormRegister<any>;
+  errors: FieldErrors<any>;
   isRegistering: boolean;
+}
+
+export interface RegisterFieldsProps {
+  register: UseFormRegister<any>;
+  errors: FieldErrors<any>;
+  watch: UseFormWatch<any>;
 }
 
 export interface FormButtonsProps {

@@ -1,14 +1,7 @@
 
 import React from "react";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { AuthFormData } from "@/types/auth";
-
-interface LoginFieldsProps {
-  register: UseFormRegister<AuthFormData>;
-  errors: FieldErrors<AuthFormData>;
-  isRegistering?: boolean;
-}
+import { LoginFieldsProps } from "./types";
 
 export const LoginFields: React.FC<LoginFieldsProps> = ({
   register,
@@ -31,7 +24,7 @@ export const LoginFields: React.FC<LoginFieldsProps> = ({
           autoComplete="email"
         />
         {errors.email && (
-          <span className="text-sm text-red-500">{errors.email.message}</span>
+          <span className="text-sm text-red-500">{errors.email.message as string}</span>
         )}
       </div>
       <div>
@@ -48,7 +41,7 @@ export const LoginFields: React.FC<LoginFieldsProps> = ({
           autoComplete="current-password"
         />
         {errors.password && (
-          <span className="text-sm text-red-500">{errors.password.message}</span>
+          <span className="text-sm text-red-500">{errors.password.message as string}</span>
         )}
       </div>
     </>

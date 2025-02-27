@@ -1,14 +1,27 @@
 
 import { RegisterFields } from "./RegisterFields";
-import { AuthFormData } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authSchema } from "@/validations/schemas";
+import { z } from "zod";
+
+// Definindo o schema específico para o RegisterForm
+const registerSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string().min(6, "Confirme sua senha"),
+  fullName: z.string().min(3, "Nome completo é obrigatório"),
+  phone: z.string().min(10, "Telefone é obrigatório")
+}).refine(data => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"]
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
-  onSubmit: (data: AuthFormData) => Promise<void>;
+  onSubmit: (data: RegisterFormData) => Promise<void>;
   isLoading: boolean;
   onToggleMode: () => void;
   hideToggle?: boolean;
@@ -25,8 +38,8 @@ export const RegisterForm = ({
     handleSubmit,
     formState: { errors },
     watch
-  } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
