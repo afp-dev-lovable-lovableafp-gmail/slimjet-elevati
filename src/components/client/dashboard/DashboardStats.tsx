@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ClockIcon, CheckCircleIcon, CalendarIcon } from 'lucide-react';
-import { formatDate } from '@/utils/date';
+
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarClock, CheckCircle, Clock } from "lucide-react";
 import type { Appointment } from '@/types/appointment';
 
 interface DashboardStatsProps {
@@ -10,53 +11,38 @@ interface DashboardStatsProps {
 
 const DashboardStats = ({ pendingAppointments, completedAppointments }: DashboardStatsProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-3 mt-6">
+    <div className="grid gap-4 md:grid-cols-3 mt-8">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Agendamentos Pendentes</CardTitle>
-          <ClockIcon className="h-4 w-4 text-amber-500" />
+          <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{pendingAppointments.length}</div>
           <p className="text-xs text-muted-foreground">
-            {pendingAppointments.length === 1 
-              ? 'Agendamento aguardando confirmação' 
-              : 'Agendamentos aguardando confirmação'}
+            Agendamentos aguardando confirmação
           </p>
         </CardContent>
       </Card>
-
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Consultas Concluídas</CardTitle>
-          <CheckCircleIcon className="h-4 w-4 text-green-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{completedAppointments.length}</div>
-          <p className="text-xs text-muted-foreground">
-            Consultas realizadas com sucesso
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Próxima Consulta</CardTitle>
-          <CalendarIcon className="h-4 w-4 text-blue-500" />
+          <CalendarClock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           {pendingAppointments.length > 0 ? (
             <>
-              <div className="text-sm font-medium">
-                {formatDate(pendingAppointments[0].scheduled_at, 'PPP')}
+              <div className="text-2xl font-bold">
+                {new Date(pendingAppointments[0].scheduled_at).toLocaleDateString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                {formatDate(pendingAppointments[0].scheduled_at, 'p')}
+                {new Date(pendingAppointments[0].scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                - {pendingAppointments[0].service?.name || 'Consulta'}
               </p>
             </>
           ) : (
             <>
-              <div className="text-sm font-medium">Nenhuma consulta agendada</div>
+              <div className="text-lg font-medium">Nenhuma consulta</div>
               <p className="text-xs text-muted-foreground">
                 Agende sua primeira consulta
               </p>
@@ -64,8 +50,20 @@ const DashboardStats = ({ pendingAppointments, completedAppointments }: Dashboar
           )}
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Consultas Realizadas</CardTitle>
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{completedAppointments.length}</div>
+          <p className="text-xs text-muted-foreground">
+            Consultas já realizadas
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default DashboardStats; 
+export default DashboardStats;
