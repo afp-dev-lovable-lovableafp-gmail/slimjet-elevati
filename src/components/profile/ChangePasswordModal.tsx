@@ -10,8 +10,9 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -23,17 +24,17 @@ const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProps) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao alterar senha",
-        description: "As senhas não coincidem"
-      });
+      toast.error("As senhas não coincidem");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
       return;
     }
 
@@ -46,18 +47,15 @@ const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProps) => {
 
       if (error) throw error;
 
-      toast({
-        title: "Senha alterada com sucesso!",
-      });
+      toast.success("Senha alterada com sucesso");
       
       onClose();
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao alterar senha",
+      console.error("Error updating password:", error);
+      toast.error("Erro ao alterar senha", {
         description: error.message
       });
     } finally {
@@ -71,7 +69,7 @@ const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProps) => {
         <DialogHeader>
           <DialogTitle>Alterar Senha</DialogTitle>
           <DialogDescription>
-            Preencha os campos abaixo para alterar sua senha. A nova senha deve ter pelo menos 6 caracteres.
+            Digite sua nova senha para atualizar suas credenciais de acesso.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -136,7 +134,12 @@ const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProps) => {
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Alterando...
+                </>
+              ) : "Salvar Alterações"}
             </Button>
           </DialogFooter>
         </form>

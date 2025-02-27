@@ -27,6 +27,7 @@ const ProfileFormFields = ({ profile, onProfileChange }: ProfileFormFieldsProps)
           value={profile.full_name || ""}
           onChange={handleChange}
           placeholder="Seu nome completo"
+          required
         />
       </div>
       
@@ -49,6 +50,7 @@ const ProfileFormFields = ({ profile, onProfileChange }: ProfileFormFieldsProps)
           value={profile.phone || ""}
           onChange={handleChange}
           placeholder="(00) 00000-0000"
+          required
         />
       </div>
     </div>

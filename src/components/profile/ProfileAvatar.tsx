@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Camera, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { getInitials } from "@/utils/string";
 
 export interface ProfileAvatarProps {
   avatarUrl?: string;
@@ -85,7 +87,7 @@ const ProfileAvatar = ({ avatarUrl, onAvatarChange, userId }: ProfileAvatarProps
       <Avatar className="h-24 w-24">
         <AvatarImage src={avatarUrl} alt="Avatar" />
         <AvatarFallback className="text-2xl">
-          {userId?.slice(0, 2).toUpperCase() || "?"}
+          {getInitials(userId)}
         </AvatarFallback>
       </Avatar>
 
