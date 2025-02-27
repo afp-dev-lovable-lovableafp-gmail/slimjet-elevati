@@ -1,3 +1,4 @@
+
 import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthState } from '@/hooks/auth/useAuthState';
@@ -5,7 +6,6 @@ import { useProfile } from '@/hooks/auth/useProfile';
 import { useAuthSession } from '@/hooks/auth/useAuthSession';
 import { toast } from 'sonner';
 import { logger } from '@/utils/logger';
-import { useNavigate } from 'react-router-dom';
 import { OAuthLoginParams, Client } from '@/types/auth';
 
 interface AuthContextType {
@@ -175,9 +175,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await supabase.auth.signOut();
       
+      setAuthState({
+        user: null,
+        profile: null,
+        client: null,
+        authenticated: false
+      });
+      
       logger.info("auth", "Logout realizado com sucesso");
       
       toast.success('Logout realizado com sucesso');
+      
+      // O redirecionamento será feito pelo componente que chama signOut
     } catch (error: any) {
       logger.error("auth", "Erro durante logout", { error });
       

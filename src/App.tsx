@@ -1,3 +1,4 @@
+
 import { 
   createBrowserRouter, 
   RouterProvider, 
@@ -101,14 +102,16 @@ const router = createBrowserRouter([
     element: <ProtectedLayout />,
     errorElement: <Navigate to="/auth" replace />,
     children: [
+      // Dashboard sem layout com navbar e footer
+      { 
+        path: 'dashboard', 
+        element: <Dashboard />,
+      },
+      // Outras páginas com o ClientLayout (navbar e footer)
       {
         path: '',
         element: <ClientLayout />,
         children: [
-          { 
-            path: 'dashboard', 
-            element: <Dashboard />,
-          },
           {
             path: 'profile',
             element: <Profile />,
