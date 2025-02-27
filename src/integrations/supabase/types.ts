@@ -11,74 +11,71 @@ export type Database = {
     Tables: {
       about_settings: {
         Row: {
-          company_name: string
+          company_name: string | null
           created_at: string | null
-          history_content: string
-          history_title: string
+          history_content: string | null
+          history_title: string | null
           id: string
-          mission_content: string
-          mission_title: string
-          page_title: string
+          mission_content: string | null
+          mission_title: string | null
+          page_title: string | null
           updated_at: string | null
-          values_content: Json
-          values_title: string
+          vision_content: string | null
+          vision_title: string | null
         }
         Insert: {
-          company_name?: string
+          company_name?: string | null
           created_at?: string | null
-          history_content: string
-          history_title?: string
+          history_content?: string | null
+          history_title?: string | null
           id?: string
-          mission_content: string
-          mission_title?: string
-          page_title?: string
+          mission_content?: string | null
+          mission_title?: string | null
+          page_title?: string | null
           updated_at?: string | null
-          values_content?: Json
-          values_title?: string
+          vision_content?: string | null
+          vision_title?: string | null
         }
         Update: {
-          company_name?: string
+          company_name?: string | null
           created_at?: string | null
-          history_content?: string
-          history_title?: string
+          history_content?: string | null
+          history_title?: string | null
           id?: string
-          mission_content?: string
-          mission_title?: string
-          page_title?: string
+          mission_content?: string | null
+          mission_title?: string | null
+          page_title?: string | null
           updated_at?: string | null
-          values_content?: Json
-          values_title?: string
+          vision_content?: string | null
+          vision_title?: string | null
         }
         Relationships: []
       }
       analytics_metrics: {
         Row: {
+          change_percentage: number | null
           created_at: string | null
           custom_metric_id: string | null
           date: string
           id: string
-          metadata: Json | null
-          metric_type: string
           updated_at: string | null
           value: number
         }
         Insert: {
+          change_percentage?: number | null
           created_at?: string | null
           custom_metric_id?: string | null
           date?: string
           id?: string
-          metadata?: Json | null
-          metric_type: string
           updated_at?: string | null
-          value: number
+          value?: number
         }
         Update: {
+          change_percentage?: number | null
           created_at?: string | null
           custom_metric_id?: string | null
           date?: string
           id?: string
-          metadata?: Json | null
-          metric_type?: string
           updated_at?: string | null
           value?: number
         }
@@ -131,13 +128,6 @@ export type Database = {
             foreignKeyName: "appointments_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "popular_services"
-            referencedColumns: ["service_id"]
-          },
-          {
-            foreignKeyName: "appointments_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
@@ -152,7 +142,6 @@ export type Database = {
       }
       clients: {
         Row: {
-          auth_id: string | null
           avatar_url: string | null
           company_name: string | null
           created_at: string | null
@@ -161,10 +150,8 @@ export type Database = {
           id: string
           phone: string | null
           updated_at: string | null
-          user_type: string
         }
         Insert: {
-          auth_id?: string | null
           avatar_url?: string | null
           company_name?: string | null
           created_at?: string | null
@@ -173,10 +160,8 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string | null
-          user_type?: string
         }
         Update: {
-          auth_id?: string | null
           avatar_url?: string | null
           company_name?: string | null
           created_at?: string | null
@@ -185,7 +170,6 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string | null
-          user_type?: string
         }
         Relationships: []
       }
@@ -226,20 +210,13 @@ export type Database = {
           options?: Json | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "custom_fields_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       custom_metrics: {
         Row: {
           calculation_method: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           id: string
           is_active: boolean | null
@@ -250,6 +227,7 @@ export type Database = {
         Insert: {
           calculation_method?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
@@ -260,6 +238,7 @@ export type Database = {
         Update: {
           calculation_method?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
@@ -300,15 +279,7 @@ export type Database = {
           report_config?: Json
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "custom_reports_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       document_templates: {
         Row: {
@@ -344,15 +315,7 @@ export type Database = {
           updated_at?: string | null
           variables?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "document_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       feedbacks: {
         Row: {
@@ -360,30 +323,27 @@ export type Database = {
           comment: string | null
           created_at: string | null
           id: string
-          rating: number | null
+          rating: number
           sentiment: string | null
           updated_at: string | null
-          user_id: string | null
         }
         Insert: {
           appointment_id?: string | null
           comment?: string | null
           created_at?: string | null
           id?: string
-          rating?: number | null
+          rating: number
           sentiment?: string | null
           updated_at?: string | null
-          user_id?: string | null
         }
         Update: {
           appointment_id?: string | null
           comment?: string | null
           created_at?: string | null
           id?: string
-          rating?: number | null
+          rating?: number
           sentiment?: string | null
           updated_at?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
@@ -393,40 +353,30 @@ export type Database = {
             referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "feedbacks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       nps_responses: {
         Row: {
-          category: string | null
+          comment: string | null
           created_at: string | null
-          feedback: string | null
           id: string
-          score: number | null
+          score: number
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          category?: string | null
+          comment?: string | null
           created_at?: string | null
-          feedback?: string | null
           id?: string
-          score?: number | null
+          score: number
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          category?: string | null
+          comment?: string | null
           created_at?: string | null
-          feedback?: string | null
           id?: string
-          score?: number | null
+          score?: number
           updated_at?: string | null
           user_id?: string | null
         }
@@ -447,7 +397,7 @@ export type Database = {
           id: string
           page_path: string
           updated_at: string | null
-          visit_date: string | null
+          visit_date: string
           visit_hour: number | null
         }
         Insert: {
@@ -456,7 +406,7 @@ export type Database = {
           id?: string
           page_path: string
           updated_at?: string | null
-          visit_date?: string | null
+          visit_date: string
           visit_hour?: number | null
         }
         Update: {
@@ -465,44 +415,70 @@ export type Database = {
           id?: string
           page_path?: string
           updated_at?: string | null
-          visit_date?: string | null
+          visit_date?: string
           visit_hour?: number | null
         }
         Relationships: []
       }
-      profiles: {
+      popular_services: {
         Row: {
-          avatar_url: string | null
-          company_name: string | null
+          count: number | null
           created_at: string | null
-          full_name: string | null
           id: string
-          is_admin: boolean | null
-          phone: string | null
+          name: string | null
+          service_id: string | null
           updated_at: string | null
-          user_type: string
         }
         Insert: {
-          avatar_url?: string | null
-          company_name?: string | null
+          count?: number | null
           created_at?: string | null
-          full_name?: string | null
-          id: string
-          is_admin?: boolean | null
-          phone?: string | null
+          id?: string
+          name?: string | null
+          service_id?: string | null
           updated_at?: string | null
-          user_type?: string
         }
         Update: {
-          avatar_url?: string | null
-          company_name?: string | null
+          count?: number | null
           created_at?: string | null
-          full_name?: string | null
+          id?: string
+          name?: string | null
+          service_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "popular_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          auth_id: string | null
+          created_at: string | null
+          id: string
+          is_admin: boolean | null
+          updated_at: string | null
+          user_type: string | null
+        }
+        Insert: {
+          auth_id?: string | null
+          created_at?: string | null
+          id: string
+          is_admin?: boolean | null
+          updated_at?: string | null
+          user_type?: string | null
+        }
+        Update: {
+          auth_id?: string | null
+          created_at?: string | null
           id?: string
           is_admin?: boolean | null
-          phone?: string | null
           updated_at?: string | null
-          user_type?: string
+          user_type?: string | null
         }
         Relationships: []
       }
@@ -530,13 +506,6 @@ export type Database = {
             foreignKeyName: "service_tags_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "popular_services"
-            referencedColumns: ["service_id"]
-          },
-          {
-            foreignKeyName: "service_tags_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
@@ -553,7 +522,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          display_order: number | null
+          display_order: number
           duration: number
           id: string
           is_active: boolean | null
@@ -564,18 +533,18 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          display_order?: number | null
-          duration?: number
+          display_order: number
+          duration: number
           id?: string
           is_active?: boolean | null
           name: string
-          price?: number
+          price: number
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
-          display_order?: number | null
+          display_order?: number
           duration?: number
           id?: string
           is_active?: boolean | null
@@ -590,28 +559,22 @@ export type Database = {
           count: number | null
           created_at: string | null
           id: string
-          page_path: string
           updated_at: string | null
-          visit_date: string | null
-          visit_hour: number | null
+          visit_date: string
         }
         Insert: {
           count?: number | null
           created_at?: string | null
           id?: string
-          page_path: string
           updated_at?: string | null
-          visit_date?: string | null
-          visit_hour?: number | null
+          visit_date: string
         }
         Update: {
           count?: number | null
           created_at?: string | null
           id?: string
-          page_path?: string
           updated_at?: string | null
-          visit_date?: string | null
-          visit_hour?: number | null
+          visit_date?: string
         }
         Relationships: []
       }
@@ -645,35 +608,35 @@ export type Database = {
       system_logs: {
         Row: {
           context: Json | null
-          created_at: string
+          created_at: string | null
           error_details: Json | null
           id: string
           level: string
           message: string
           module: string
-          updated_at: string
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
           context?: Json | null
-          created_at?: string
+          created_at?: string | null
           error_details?: Json | null
           id?: string
           level: string
           message: string
           module: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           context?: Json | null
-          created_at?: string
+          created_at?: string | null
           error_details?: Json | null
           id?: string
           level?: string
           message?: string
           module?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -745,7 +708,6 @@ export type Database = {
           description: string | null
           first_name: string
           id: string
-          is_admin: boolean | null
           last_name: string
           linkedin_url: string | null
           middle_name: string | null
@@ -760,7 +722,6 @@ export type Database = {
           description?: string | null
           first_name: string
           id?: string
-          is_admin?: boolean | null
           last_name: string
           linkedin_url?: string | null
           middle_name?: string | null
@@ -775,7 +736,6 @@ export type Database = {
           description?: string | null
           first_name?: string
           id?: string
-          is_admin?: boolean | null
           last_name?: string
           linkedin_url?: string | null
           middle_name?: string | null
@@ -788,14 +748,7 @@ export type Database = {
       }
     }
     Views: {
-      popular_services: {
-        Row: {
-          count: number | null
-          name: string | null
-          service_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_if_admin: {
@@ -803,16 +756,6 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
-      }
-      get_profile_by_id: {
-        Args: {
-          profile_id: string
-        }
-        Returns: {
-          id: string
-          full_name: string
-          is_admin: boolean
-        }[]
       }
     }
     Enums: {
