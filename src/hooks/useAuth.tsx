@@ -1,4 +1,3 @@
-
 import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthState } from '@/hooks/auth/useAuthState';
@@ -34,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { profile: fetchedProfile, status: profileStatus } = useProfile(user?.id);
   
   // Inicializar a sessão do usuário
-  useAuthSession();
+  useAuthSession(setAuthState);
 
   useEffect(() => {
     // Atualizar o estado do profile quando ele for carregado

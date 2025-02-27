@@ -1,4 +1,3 @@
-
 import { Check, Clock, Sparkles, HeartHandshake } from "lucide-react";
 
 const Benefits = () => {

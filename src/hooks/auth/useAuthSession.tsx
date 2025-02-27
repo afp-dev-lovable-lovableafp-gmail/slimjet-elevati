@@ -1,12 +1,11 @@
-
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from "@/hooks/useAuth";
 import { logger } from "@/utils/logger";
+import type { AuthState } from '@/types/auth';
 
-export const useAuthSession = () => {
-  const { setAuthState } = useAuth();
+type SetAuthState = (newState: Partial<AuthState> | ((prev: AuthState) => AuthState)) => void;
 
+export const useAuthSession = (setAuthState: SetAuthState) => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -33,5 +32,5 @@ export const useAuthSession = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [setAuthState]);
 };
