@@ -1,4 +1,3 @@
-
 import { 
   createBrowserRouter, 
   RouterProvider, 
@@ -7,7 +6,7 @@ import {
 } from 'react-router-dom';
 import { AuthProvider } from '@/hooks/useAuth';
 import { Toaster } from 'sonner';
-import { HelmetProvider } from "@/providers/helmet-provider";
+import { HelmetProvider } from "react-helmet-async";
 import Auth from './pages/Auth';
 import Index from './pages/Index';
 import About from './pages/About';
@@ -21,7 +20,7 @@ import Booking from './pages/client/Booking';
 import Appointments from './pages/client/Appointments';
 import { useAuth } from './hooks/useAuth';
 import { Suspense, lazy } from 'react';
-import ClientLayout from './components/layouts/ClientLayout';
+import { ClientLayout } from '@/components/client/layout';
 import { supabase } from '@/lib/supabase';
 
 // Componente para rotas protegidas (autenticadas)

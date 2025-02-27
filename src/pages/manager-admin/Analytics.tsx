@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { BackButton } from "@/components/ui/back-button";
 import { AnalyticsOverview } from "@/components/analytics/data-display/AnalyticsOverview";

@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import { BackButton } from "@/components/ui/back-button";
 import { useServices } from "@/hooks/useServices";
 import { useServiceOperations } from "@/hooks/useServiceOperations";

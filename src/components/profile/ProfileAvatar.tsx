@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -67,7 +66,7 @@ const ProfileAvatar = ({ avatarUrl, onAvatarChange, userId }: ProfileAvatarProps
 
       onAvatarChange(data.publicUrl);
       toast.success("Avatar atualizado com sucesso");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating avatar:", error);
       toast.error("Erro ao atualizar avatar");
     } finally {
@@ -117,6 +116,8 @@ const ProfileAvatar = ({ avatarUrl, onAvatarChange, userId }: ProfileAvatarProps
           accept="image/*"
           onChange={handleFileChange}
           className="hidden"
+          title="Selecionar foto de perfil"
+          aria-label="Selecionar foto de perfil"
         />
       </div>
     </div>

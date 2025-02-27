@@ -1,5 +1,4 @@
-
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import { BackButton } from "@/components/ui/back-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import TeamMemberForm from "@/components/admin/TeamMemberForm";

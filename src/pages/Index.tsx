@@ -1,6 +1,5 @@
-
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import Benefits from "@/components/sections/Benefits";
 import Hero from "@/components/sections/Hero";
 import ServicesSection from "@/components/sections/ServicesSection";

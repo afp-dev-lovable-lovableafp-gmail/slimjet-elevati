@@ -1,5 +1,4 @@
-
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import ServicesSection from "@/components/sections/ServicesSection";
 import { BackButton } from "@/components/ui/back-button";

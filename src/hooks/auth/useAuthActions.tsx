@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -32,11 +31,11 @@ export const useAuthActions = () => {
 
       navigate("/client/dashboard"); // Atualizado para a nova rota
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const appError = toAppError(error, { email });
       logger.error("auth", "Erro no login", appError);
       
-      if (error.message) {
+      if (error instanceof Error && error.message) {
         toast.error("Erro ao fazer login", {
           description: error.message
         });
@@ -110,12 +109,12 @@ export const useAuthActions = () => {
       });
 
       return authData;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const appError = toAppError(error, { email });
       logger.error("auth", "Erro no cadastro", appError);
       
       toast.error("Erro no cadastro", {
-        description: error.message || "Não foi possível completar o cadastro. Tente novamente."
+        description: error instanceof Error ? error.message : "Não foi possível completar o cadastro. Tente novamente."
       });
       
       throw error;
@@ -124,27 +123,33 @@ export const useAuthActions = () => {
 
   const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Primeiro removemos todos os dados locais
+      localStorage.clear();
+      sessionStorage.clear();
+      queryClient.clear();
 
-      // Limpar o cache do QueryClient
-      await queryClient.clear();
-      
-      logger.info("auth", "Logout realizado com sucesso");
-      
-      navigate('/auth');
-      toast.success("Logout realizado", {
-        description: "Até logo!"
+      // Removemos os cookies do Supabase
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
-    } catch (error: any) {
-      const appError = toAppError(error);
-      logger.error("auth", "Erro ao fazer logout", appError);
+
+      // Fazemos o logout no Supabase
+      await supabase.auth.signOut();
+
+      // Redirecionamos para a página de autenticação
+      window.location.href = '/auth/login';
+    } catch (error: unknown) {
+      logger.error("auth", "Erro ao fazer logout", toAppError(error));
       
-      toast.error("Erro ao fazer logout", {
-        description: error.message || "Não foi possível fazer logout. Tente novamente."
-      });
+      // Em caso de erro, forçamos a limpeza e redirecionamento
+      localStorage.clear();
+      sessionStorage.clear();
+      queryClient.clear();
+      window.location.href = '/auth/login';
     }
-  }, [queryClient, navigate]);
+  }, [queryClient]);
 
   return {
     signIn,

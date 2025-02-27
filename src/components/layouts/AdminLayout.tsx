@@ -1,5 +1,4 @@
-
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/admin/useAdminAuth";

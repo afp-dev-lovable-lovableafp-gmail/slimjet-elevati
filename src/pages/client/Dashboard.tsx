@@ -1,5 +1,4 @@
-
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import DashboardSection from "@/components/sections/DashboardSection";
 
 const Dashboard = () => {

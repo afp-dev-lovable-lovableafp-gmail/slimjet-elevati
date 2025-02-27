@@ -1,9 +1,8 @@
-
-import { Helmet } from "@/providers/helmet-provider";
+import { Helmet } from "react-helmet-async";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/ui/back-button";
-import AppointmentsList from "@/components/appointments/AppointmentsList";
+import ClientAppointmentsList from "@/components/client/appointments/ClientAppointmentsList";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useAppointmentQueries } from "@/hooks/appointments/useAppointmentQueries";
@@ -42,7 +41,7 @@ const Appointments = () => {
       <div className="container mx-auto px-4 py-8">
         <BackButton />
         <h1 className="text-2xl font-semibold mb-6">Meus Agendamentos</h1>
-        <AppointmentsList appointments={appointments || []} />
+        <ClientAppointmentsList appointments={appointments || []} isLoading={isLoading} />
       </div>
     </>
   );

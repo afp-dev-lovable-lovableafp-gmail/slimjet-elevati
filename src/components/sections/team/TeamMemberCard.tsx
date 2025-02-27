@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin } from "lucide-react";
 import type { TeamMember } from "@/types/team";
@@ -37,6 +36,7 @@ export const TeamMemberCard = ({ member, index }: TeamMemberCardProps) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-primary transition-colors"
+                title={`Perfil do LinkedIn de ${member.first_name} ${member.last_name}`}
               >
                 <Linkedin className="w-5 h-5" />
               </a>

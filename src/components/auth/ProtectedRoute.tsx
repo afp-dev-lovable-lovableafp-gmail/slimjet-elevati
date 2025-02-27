@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,10 +13,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (!loading && !authenticated) {
-      toast.error("Acesso não autorizado", {
-        description: "Por favor, faça login para acessar esta página.",
-      });
-      navigate("/auth");
+      // Redirecionamos para a página inicial sem mostrar mensagem
+      navigate("/", { replace: true });
     }
   }, [loading, authenticated, navigate]);
 
