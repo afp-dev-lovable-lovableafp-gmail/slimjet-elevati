@@ -1,4 +1,5 @@
-import { Helmet } from "react-helmet";
+
+import { Helmet } from "@/providers/helmet-provider";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/Navbar";

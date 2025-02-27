@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import { AuthProvider } from '@/hooks/useAuth';
 import { Toaster } from 'sonner';
+import { HelmetProvider } from "@/providers/helmet-provider";
 import Auth from './pages/Auth';
 import Index from './pages/Index';
 import About from './pages/About';
@@ -133,10 +134,12 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-      <Toaster position="top-right" />
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" />
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

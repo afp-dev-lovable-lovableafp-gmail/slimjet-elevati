@@ -1,4 +1,6 @@
+
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "@/providers/helmet-provider";
 import Benefits from "@/components/sections/Benefits";
 import Hero from "@/components/sections/Hero";
 import ServicesSection from "@/components/sections/ServicesSection";
@@ -11,6 +13,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>ElevaTI - Tecnologia para Negócios</title>
+        <meta name="description" content="Soluções de tecnologia para impulsionar o seu negócio. Conheça nossos serviços de consultoria, desenvolvimento e suporte." />
+      </Helmet>
       <Navbar />
       <main>
         <Hero />

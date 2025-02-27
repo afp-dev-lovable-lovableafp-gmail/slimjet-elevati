@@ -1,4 +1,5 @@
-import { Helmet } from "react-helmet";
+
+import { Helmet } from "@/providers/helmet-provider";
 import ProfileSection from "@/components/sections/ProfileSection";
 
 const Profile = () => {

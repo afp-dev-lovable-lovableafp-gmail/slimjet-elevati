@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Helmet } from "react-helmet";
+import { HelmetProvider as ReactHelmetProvider, Helmet } from "react-helmet-async";
 import { type ReactNode } from "react";
 
 interface HelmetProviderProps {
@@ -9,7 +9,7 @@ interface HelmetProviderProps {
 }
 
 export function HelmetProvider({ children }: HelmetProviderProps) {
-  return <>{children}</>;
+  return <ReactHelmetProvider>{children}</ReactHelmetProvider>;
 }
 
 export { Helmet };

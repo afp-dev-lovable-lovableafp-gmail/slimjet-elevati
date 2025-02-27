@@ -1,5 +1,5 @@
 
-import { Helmet } from "react-helmet";
+import { Helmet } from "@/providers/helmet-provider";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import NotFoundSection from "@/components/sections/NotFoundSection";

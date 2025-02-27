@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { Helmet } from "@/providers/helmet-provider";
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -54,6 +55,11 @@ const AppointmentsAdmin = () => {
 
   return (
     <AdminLayout>
+      <Helmet>
+        <title>ElevaTI - Gerenciar Agendamentos</title>
+        <meta name="description" content="Gerencie os agendamentos da plataforma ElevaTI" />
+      </Helmet>
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Gerenciar Agendamentos</h1>
         <p className="text-gray-600 mt-1">
