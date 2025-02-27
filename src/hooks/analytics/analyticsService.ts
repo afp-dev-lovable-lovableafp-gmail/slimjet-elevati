@@ -8,6 +8,7 @@ import {
   isNpsData 
 } from "./typeGuards";
 import { logger } from "@/features/logging/logger";
+import { toAppError } from "@/types/extended-error";
 import type { 
   PageVisit, 
   PopularService, 
@@ -74,9 +75,16 @@ const fetchPageVisits = async (startDate: Date, endDate: Date): Promise<PageVisi
 
     if (error) throw error;
     
-    return (data || []).filter(isPageVisit);
-  } catch (error) {
-    logger.error(MODULE, 'Failed to fetch page visits', { error });
+    return data || [];
+  } catch (err) {
+    const appError = toAppError(err, {
+      dateRange: {
+        start: startDate.toISOString(),
+        end: endDate.toISOString()
+      }
+    });
+    
+    logger.error(MODULE, 'Failed to fetch page visits', appError);
     throw new Error('Falha ao carregar dados de visitas');
   }
 };
@@ -105,8 +113,9 @@ const fetchPopularServices = async (): Promise<PopularService[]> => {
       },
       count: item.count || 0
     })).filter(isPopularService);
-  } catch (error) {
-    logger.error(MODULE, 'Failed to fetch popular services', { error });
+  } catch (err) {
+    const appError = toAppError(err);
+    logger.error(MODULE, 'Failed to fetch popular services', appError);
     throw new Error('Falha ao carregar dados de serviços populares');
   }
 };
@@ -126,8 +135,15 @@ const fetchFeedbacks = async (startDate: Date, endDate: Date): Promise<FeedbackD
     if (error) throw error;
     
     return (data || []).filter(isFeedbackData);
-  } catch (error) {
-    logger.error(MODULE, 'Failed to fetch feedbacks', { error });
+  } catch (err) {
+    const appError = toAppError(err, {
+      dateRange: {
+        start: startDate.toISOString(),
+        end: endDate.toISOString()
+      }
+    });
+    
+    logger.error(MODULE, 'Failed to fetch feedbacks', appError);
     throw new Error('Falha ao carregar dados de feedback');
   }
 };
@@ -147,8 +163,15 @@ const fetchNpsData = async (startDate: Date, endDate: Date): Promise<NpsData[]> 
     if (error) throw error;
     
     return (data || []).filter(isNpsData);
-  } catch (error) {
-    logger.error(MODULE, 'Failed to fetch NPS data', { error });
+  } catch (err) {
+    const appError = toAppError(err, {
+      dateRange: {
+        start: startDate.toISOString(),
+        end: endDate.toISOString()
+      }
+    });
+    
+    logger.error(MODULE, 'Failed to fetch NPS data', appError);
     throw new Error('Falha ao carregar dados NPS');
   }
 };
@@ -190,8 +213,9 @@ export const fetchAnalyticsData = async (dateRange: string): Promise<AnalyticsRe
       ...analyticsData,
       metrics: calculateMetrics(analyticsData)
     };
-  } catch (error) {
-    logger.error(MODULE, 'Failed to fetch analytics data', { error });
-    throw error;
+  } catch (err) {
+    const appError = toAppError(err, { dateRange });
+    logger.error(MODULE, 'Failed to fetch analytics data', appError);
+    throw err;
   }
 };

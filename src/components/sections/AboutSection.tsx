@@ -1,79 +1,94 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import React, { useEffect } from "react";
+import { Container } from "@/components/ui/container";
+import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/text";
 import { useAboutSettings } from "@/hooks/useAboutSettings";
-import { Skeleton } from "@/components/ui/skeleton";
 
-const AboutSection = () => {
-  const { settings, isLoading } = useAboutSettings();
+export const AboutSection = () => {
+  const { settings, loading, error, fetchSettings } = useAboutSettings();
 
-  if (isLoading) {
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  if (loading) {
     return (
-      <div className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <Skeleton className="h-12 w-3/4 mx-auto" />
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 w-full" />
-            ))}
+      <section className="py-16 bg-gray-50">
+        <Container>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold">Carregando...</h2>
           </div>
-        </div>
-      </div>
+        </Container>
+      </section>
     );
   }
 
-  if (!settings) return null;
+  if (error || !settings) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <Container>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold">Sobre nós</h2>
+            <p className="mt-4 text-gray-600">
+              Informações não disponíveis no momento. Por favor, tente novamente mais tarde.
+            </p>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  const renderSection = (title: string | null | undefined, content: string | null | undefined) => {
+    if (!title || !content) return null;
+    
+    // Verificamos se o conteúdo é uma string antes de tentar dividi-lo
+    const paragraphs = typeof content === 'string' 
+      ? content.split('\n').filter(p => p.trim() !== '') 
+      : [];
+    
+    return (
+      <div className="mb-10">
+        <h3 className="text-2xl font-semibold mb-4">{title}</h3>
+        {paragraphs.map((paragraph, index) => (
+          <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <div className="pt-24 pb-16">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto"
-        >
-          <h1 className="text-4xl font-bold text-center mb-8">
-            {settings.page_title}
-          </h1>
-          
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-semibold mb-4">
-                {settings.history_title}
-              </h2>
-              <p className="text-gray-600 whitespace-pre-wrap">
-                {settings.history_content}
-              </p>
-            </CardContent>
-          </Card>
+    <section className="py-16 bg-gray-50" id="about">
+      <Container>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold">{settings.page_title || "Sobre nós"}</h2>
+          <Text variant="muted" className="mt-4 max-w-2xl mx-auto">
+            Conheça mais sobre a {settings.company_name || "nossa empresa"} e nossa história.
+          </Text>
+        </div>
 
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-semibold mb-4">
-                {settings.mission_title}
-              </h2>
-              <p className="text-gray-600 whitespace-pre-wrap">
-                {settings.mission_content}
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid md:grid-cols-2 gap-10">
+          <div>
+            {renderSection(settings.mission_title, settings.mission_content)}
+            {renderSection(settings.values_title, settings.values_content)}
+          </div>
+          <div>
+            {renderSection(settings.vision_title, settings.vision_content)}
+            {renderSection(settings.history_title, settings.history_content)}
+          </div>
+        </div>
 
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-semibold mb-4">
-                {settings.values_title}
-              </h2>
-              <ul className="space-y-2 text-gray-600">
-                {settings.values_content.map((value, index) => (
-                  <li key={index}>• {value}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    </div>
+        <Separator className="my-12" />
+
+        <div className="text-center">
+          <p className="text-gray-600">
+            {settings.company_name || "Nossa empresa"} - Comprometidos com a excelência desde a nossa fundação.
+          </p>
+        </div>
+      </Container>
+    </section>
   );
 };
 

@@ -9,11 +9,14 @@ export interface TeamMember {
   linkedin_url?: string;
   photo_url?: string;
   status?: "active" | "inactive";
-  is_admin?: boolean;
-  email?: string;
-  password?: string;
+  created_at?: string;
+  updated_at?: string;
   team_member_specialties?: TeamMemberSpecialty[];
+}
+
+export interface DatabaseTeamMember extends TeamMember {
   auth_id?: string;
+  is_admin?: boolean;
 }
 
 export interface TeamMemberFormData extends TeamMember {

@@ -1,56 +1,115 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import ProfileAvatar from "./ProfileAvatar";
-import ProfileFormFields from "./ProfileFormFields";
-import { useProfileForm } from "@/hooks/profile/useProfileForm";
-import type { FormProfile } from "@/types/profile";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import ChangePasswordModal from './ChangePasswordModal';
+import ProfileAvatar from './ProfileAvatar';
+import ProfileFormFields from './ProfileFormFields';
+import { toast } from 'sonner';
+import type { FormProfile } from '@/types/profile';
+import type { Client } from '@/types/auth';
 
-const ProfileForm = () => {
-  const {
-    profile,
-    loading,
-    handleSubmit,
-    handleProfileChange
-  } = useProfileForm();
+interface ProfileFormProps {
+  initialData: FormProfile;
+  onSubmit: (profile: FormProfile) => void;
+  isLoading: boolean;
+}
 
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
+export const ProfileForm = ({ initialData, onSubmit, isLoading }: ProfileFormProps) => {
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [formData, setFormData] = useState<FormProfile>(initialData);
+  const { user } = useAuth();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.full_name?.trim()) {
+      toast.error("O nome completo é obrigatório");
+      return;
+    }
+    
+    if (!formData.phone?.trim()) {
+      toast.error("O telefone é obrigatório");
+      return;
+    }
+    
+    onSubmit(formData);
+  };
+
+  const handleResetPassword = async () => {
+    setPasswordModalOpen(true);
+  };
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader className="text-center">
-        <div className="flex flex-col items-center space-y-4">
-          <ProfileAvatar
-            userId={profile.userId || ""}
-            avatarUrl={profile.avatar_url || ""}
-            fullName={profile.full_name}
-            onAvatarUpdate={(url) => handleProfileChange({ ...profile, avatar_url: url })}
-          />
+    <>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
           <CardTitle>Meu Perfil</CardTitle>
           <CardDescription>
-            Mantenha seus dados atualizados
+            Atualize suas informações pessoais e configure sua conta
           </CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <ProfileFormFields
-            profile={profile}
-            onProfileChange={handleProfileChange}
-          />
-          <Button type="submit" className="w-full">
-            Salvar Alterações
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <ProfileAvatar 
+              avatarUrl={formData.avatar_url || undefined} 
+              onAvatarChange={(url) => setFormData(prev => ({ ...prev, avatar_url: url }))}
+              userId={formData.id}
+            />
+            
+            <ProfileFormFields 
+              profile={formData as Client}
+              onProfileChange={(updatedProfile) => setFormData(prev => ({ ...prev, ...updatedProfile }))}
+            />
+            
+            <div className="pt-4 border-t space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                value={user?.email || ''}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-sm text-muted-foreground">
+                Para alterar seu email, entre em contato com o suporte
+              </p>
+            </div>
+            
+            <div className="flex justify-between items-center pt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResetPassword}
+              >
+                Alterar Senha
+              </Button>
+              
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+      
+      <ChangePasswordModal 
+        isOpen={passwordModalOpen} 
+        onClose={() => setPasswordModalOpen(false)} 
+      />
+    </>
   );
 };
 

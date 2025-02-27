@@ -1,6 +1,6 @@
 
 import { useMemo } from "react";
-import type { AppointmentStatus } from "@/types/appointment";
+import { AppointmentStatus } from "@/types/appointment";
 
 interface AppointmentStatusBadgeProps {
   status: AppointmentStatus;

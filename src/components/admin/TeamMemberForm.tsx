@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { PersonalInfoSection } from "./team-member/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./team-member/ProfessionalInfoSection";
-import { AdminToggle } from "./team-member/AdminToggle";
 import { useTeamMemberForm } from "@/hooks/useTeamMemberForm";
 import type { TeamMember } from "@/types/team";
 
@@ -22,9 +21,7 @@ const TeamMemberForm = ({ member, onClose, onSuccess }: TeamMemberFormProps) => 
     selectedSpecialties,
     setSelectedSpecialties,
     setPhotoFile,
-    onSubmit,
-    isAdmin,
-    setIsAdmin,
+    onSubmit
   } = useTeamMemberForm(member, onSuccess, onClose);
 
   return (
@@ -44,11 +41,6 @@ const TeamMemberForm = ({ member, onClose, onSuccess }: TeamMemberFormProps) => 
           selectedSpecialties={selectedSpecialties}
           setSelectedSpecialties={setSelectedSpecialties}
           onPhotoChange={setPhotoFile}
-        />
-
-        <AdminToggle
-          isAdmin={isAdmin}
-          setIsAdmin={setIsAdmin}
         />
       </div>
 

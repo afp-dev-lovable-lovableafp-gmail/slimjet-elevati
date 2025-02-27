@@ -1,57 +1,86 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { AboutSettings, UpdateAboutSettingsDTO } from "@/types/about";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import type { AboutSettings, AboutSettingsFormData } from "@/types/about";
 
 export const useAboutSettings = () => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [settings, setSettings] = useState<AboutSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ["about-settings"],
-    queryFn: async () => {
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
       const { data, error } = await supabase
         .from("about_settings")
         .select("*")
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
-      return data as AboutSettings;
-    }
-  });
 
-  const updateSettings = useMutation({
-    mutationFn: async (newSettings: UpdateAboutSettingsDTO) => {
-      const { data, error } = await supabase
-        .from("about_settings")
-        .update(newSettings)
-        .eq("id", settings?.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["about-settings"] });
-      toast({
-        title: "Configurações atualizadas",
-        description: "As alterações foram salvas com sucesso."
-      });
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar",
-        description: error.message
-      });
+      setSettings(data as unknown as AboutSettings);
+      setError(null);
+    } catch (error: any) {
+      console.error("Error fetching about settings:", error);
+      setError(error);
+      toast.error("Erro ao carregar configurações");
+    } finally {
+      setLoading(false);
     }
-  });
+  };
+
+  const updateSettings = async (formData: AboutSettingsFormData) => {
+    try {
+      setLoading(true);
+
+      if (settings?.id) {
+        // Atualizar configurações existentes
+        const { error } = await supabase
+          .from("about_settings")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", settings.id);
+
+        if (error) throw error;
+      } else {
+        // Criar novas configurações
+        const { data, error } = await supabase
+          .from("about_settings")
+          .insert([
+            {
+              ...formData,
+              created_at: new Date().toISOString(),
+            },
+          ])
+          .select();
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setSettings(data[0] as unknown as AboutSettings);
+        }
+      }
+
+      await fetchSettings();
+      toast.success("Configurações salvas com sucesso");
+    } catch (error: any) {
+      console.error("Error updating about settings:", error);
+      setError(error);
+      toast.error("Erro ao salvar configurações");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     settings,
-    isLoading,
-    updateSettings
+    loading,
+    error,
+    fetchSettings,
+    updateSettings,
   };
 };

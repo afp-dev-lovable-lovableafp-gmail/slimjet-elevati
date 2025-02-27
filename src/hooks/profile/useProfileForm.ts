@@ -1,161 +1,90 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import type { FormProfile } from "@/types/profile";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import type { Client } from "@/types/auth";
 
 export const useProfileForm = () => {
-  const [profile, setProfile] = useState<FormProfile>({
+  const { user, client: authClient } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [client, setClient] = useState<Client>({
+    id: "",
     full_name: "",
-    company_name: "",
+    company_name: null,
     phone: "",
     avatar_url: null,
-    userId: ""
+    email: null
   });
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      loadProfile();
+    if (user?.id) {
+      if (authClient) {
+        setClient(authClient);
+      } else {
+        fetchClient(user.id);
+      }
     }
-  }, [user]);
+  }, [user?.id, authClient]);
 
-  const loadProfile = async () => {
+  const fetchClient = async (userId: string) => {
     try {
-      setLoading(true);
-      if (!user?.id) return;
-
-      // Primeiro tenta carregar da tabela profiles
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!profileError && profileData) {
-        setProfile({
-          full_name: profileData.full_name || "",
-          company_name: profileData.company_name || "",
-          phone: profileData.phone || "",
-          avatar_url: profileData.avatar_url,
-          userId: user.id
-        });
-      } else if (profileError && profileError.code !== 'PGRST116') {
-        // PGRST116 é o código para "nenhum registro encontrado"
-        console.error("Erro ao carregar perfil:", profileError);
-        toast({
-          variant: "destructive",
-          title: "Erro ao carregar perfil",
-          description: profileError.message
-        });
-      }
-
-      // Se não encontrou na tabela profiles, tenta criar um perfil básico
-      if (!profileData) {
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            full_name: user.user_metadata?.full_name || "",
-            phone: user.user_metadata?.phone || "",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-
-        if (insertError) {
-          console.error("Erro ao criar perfil:", insertError);
-          toast({
-            variant: "destructive",
-            title: "Erro ao criar perfil",
-            description: insertError.message
-          });
-        } else {
-          // Carrega o perfil recém-criado
-          const { data: newProfile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (newProfile) {
-            setProfile({
-              full_name: newProfile.full_name || "",
-              company_name: newProfile.company_name || "",
-              phone: newProfile.phone || "",
-              avatar_url: newProfile.avatar_url,
-              userId: user.id
-            });
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error("Erro ao processar perfil:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao processar perfil",
-        description: error.message
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!user?.id) {
-        throw new Error("Usuário não identificado");
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: profile.full_name,
-          company_name: profile.company_name,
-          phone: profile.phone,
-          avatar_url: profile.avatar_url,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
 
       if (error) throw error;
 
-      toast({
-        title: "Perfil atualizado com sucesso!",
-      });
-
-      // Atualiza os metadados do usuário
-      await supabase.auth.updateUser({
-        data: {
-          full_name: profile.full_name,
-          phone: profile.phone
-        }
-      });
-
-      navigate("/dashboard");
+      if (data) {
+        setClient(data as Client);
+      }
     } catch (error: any) {
-      console.error("Erro ao atualizar perfil:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar perfil",
-        description: error.message,
+      console.error("Error fetching client:", error);
+      toast.error("Erro ao carregar perfil", {
+        description: error.message
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleProfileChange = (newProfile: FormProfile) => {
-    setProfile(newProfile);
+  const updateProfile = async (updatedClient: Client) => {
+    if (!user?.id) return;
+
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase
+        .from("clients")
+        .update({
+          full_name: updatedClient.full_name,
+          company_name: updatedClient.company_name,
+          phone: updatedClient.phone,
+          avatar_url: updatedClient.avatar_url,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", updatedClient.id);
+
+      if (error) throw error;
+
+      setClient(updatedClient);
+      toast.success("Perfil atualizado com sucesso!");
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast.error("Erro ao atualizar perfil", {
+        description: error.message
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
-    profile,
-    loading,
-    handleSubmit,
-    handleProfileChange
+    profile: client, // Mantendo compatibilidade com código existente
+    isLoading,
+    updateProfile
   };
 };

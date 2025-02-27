@@ -18,7 +18,10 @@ export const useCustomMetricActions = () => {
         .from('custom_metrics')
         .insert(data);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[CustomMetric] Erro ao criar:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-metrics'] });
@@ -37,7 +40,10 @@ export const useCustomMetricActions = () => {
         .update(data)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[CustomMetric] Erro ao atualizar:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-metrics'] });
@@ -53,10 +59,13 @@ export const useCustomMetricActions = () => {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('custom_metrics')
-        .delete()
+        .update({ is_active: false })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[CustomMetric] Erro ao excluir:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-metrics'] });

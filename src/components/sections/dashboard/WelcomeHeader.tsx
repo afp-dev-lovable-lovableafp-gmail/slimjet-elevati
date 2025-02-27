@@ -1,41 +1,37 @@
 
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { Profile } from "@/types/auth";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { CalendarPlus } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getInitials } from '@/utils/string';
 
 interface WelcomeHeaderProps {
-  profile: Profile | null;
-  onSignOut: () => void;
+  name?: string | null;
+  avatarUrl?: string | null;
 }
 
-export const WelcomeHeader = ({ profile, onSignOut }: WelcomeHeaderProps) => {
+const WelcomeHeader = ({ name, avatarUrl }: WelcomeHeaderProps) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16 border-2 border-primary/10">
-          <AvatarImage src={profile?.avatar_url || ''} />
-          <AvatarFallback>
-            {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
-          </AvatarFallback>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+      <div className="flex items-center mb-4 sm:mb-0">
+        <Avatar className="h-12 w-12 mr-4">
+          <AvatarImage src={avatarUrl || undefined} alt={name || 'Cliente'} />
+          <AvatarFallback>{getInitials(name || 'Cliente')}</AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Bem-vindo(a), {profile?.full_name}
-          </h1>
-          <p className="text-gray-600">
-            Gerencie seus agendamentos e seus dados
-          </p>
+          <h1 className="text-2xl font-bold">Bem-vindo, {name || 'Cliente'}</h1>
+          <p className="text-gray-600">Acompanhe seus agendamentos e dados</p>
         </div>
       </div>
-      <Button
-        onClick={onSignOut}
-        variant="outline"
-        className="mt-4 md:mt-0 flex items-center gap-2"
-      >
-        <LogOut className="h-4 w-4" />
-        Sair
+      <Button asChild>
+        <Link to="/schedule">
+          <CalendarPlus className="mr-2 h-4 w-4" />
+          Agendar Consulta
+        </Link>
       </Button>
     </div>
   );
 };
+
+export default WelcomeHeader;

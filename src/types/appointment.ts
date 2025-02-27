@@ -1,52 +1,67 @@
 
-import type { Database } from "@/integrations/supabase/types";
-
-export type AppointmentStatus = Database['public']['Enums']['appointment_status'];
-
-export interface ServiceInfo {
+export interface Appointment {
   id: string;
-  name: string;
-  duration: number;
-  price: number;
+  user_id: string;
+  service_id: string;
+  scheduled_at: string;
+  status: AppointmentStatus;
+  notes?: string | null;
+  meeting_url?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  // Relacionamentos opcionais
+  services?: Service;
+  profiles?: ClientInfo;
 }
+
+export type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 export interface ClientInfo {
   id: string;
   full_name: string | null;
   company_name: string | null;
+  avatar_url?: string | null;
+  phone?: string | null;
+  email?: string | null;
 }
 
-export interface Appointment {
+export interface Service {
   id: string;
-  user_id: string | null;
-  service_id: string | null;
-  scheduled_at: string;
-  status: AppointmentStatus;
-  meeting_url?: string | null;
-  notes?: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-  services?: ServiceInfo | null;
-  profiles?: ClientInfo | null;
+  name: string;
+  duration: number;
+  price: number;
+  description?: string;
 }
 
+export interface AppointmentFormData {
+  user_id: string;
+  service_id: string;
+  scheduled_at: string;
+  notes?: string;
+}
+
+export interface AppointmentListItem {
+  id: string;
+  service: string;
+  date: string;
+  time: string;
+  status: string;
+}
+
+// Add missing DTO types
 export interface CreateAppointmentDTO {
   user_id: string;
   service_id: string;
   scheduled_at: string;
-  meeting_url?: string;
   notes?: string;
-}
-
-export interface UpdateAppointmentDTO extends Partial<Omit<CreateAppointmentDTO, 'user_id'>> {
-  id: string;
   status?: AppointmentStatus;
 }
 
-export interface AppointmentFilters {
-  status?: AppointmentStatus[];
-  startDate?: Date;
-  endDate?: Date;
-  serviceId?: string;
-  userId?: string;
+export interface UpdateAppointmentDTO {
+  id: string;
+  service_id?: string;
+  scheduled_at?: string;
+  status?: AppointmentStatus;
+  notes?: string;
+  meeting_url?: string;
 }

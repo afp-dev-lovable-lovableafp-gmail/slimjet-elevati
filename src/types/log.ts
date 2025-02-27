@@ -1,6 +1,9 @@
 
+import { AppError } from './extended-error';
+
 export type LogLevel = 'info' | 'warning' | 'error' | 'critical';
-export type LogContext = Record<string, unknown>;
+
+export type LogContext = Record<string, any>;
 
 export interface LogEntry {
   level: LogLevel;
@@ -8,22 +11,11 @@ export interface LogEntry {
   message: string;
   timestamp: string;
   context?: LogContext;
-  error?: Error;
+  error?: Error | AppError;
   userId?: string;
 }
 
-export interface SystemLog {
-  id: string;
-  level: LogLevel;
-  module: string;
-  message: string;
-  context?: LogContext;
-  error_details?: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
+export interface LoggerOptions {
+  persist?: boolean;
+  notify?: boolean;
 }

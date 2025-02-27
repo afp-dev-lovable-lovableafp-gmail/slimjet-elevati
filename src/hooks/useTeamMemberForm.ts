@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTeamMemberFormState } from "./team/useTeamMemberFormState";
 import { useTeamMemberValidation } from "./team/useTeamMemberValidation";
 import { useTeamMemberFormActions } from "./team/useTeamMemberFormActions";
@@ -21,7 +21,6 @@ export const useTeamMemberForm = (
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(
     initialData?.team_member_specialties?.map(s => s.specialty_id) || []
   );
-  const [isAdmin, setIsAdmin] = useState(initialData?.is_admin || false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -45,7 +44,6 @@ export const useTeamMemberForm = (
         description: formData.description,
         linkedin_url: formData.linkedin_url,
         id: formData.id,
-        is_admin: isAdmin,
         specialties: selectedSpecialties,
         photo_file: photoFile || undefined
       };
@@ -85,9 +83,7 @@ export const useTeamMemberForm = (
     specialties,
     selectedSpecialties,
     setSelectedSpecialties,
-    setPhotoFile,
-    isAdmin,
-    setIsAdmin
+    setPhotoFile
   };
 };
 

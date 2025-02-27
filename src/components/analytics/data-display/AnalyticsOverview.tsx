@@ -55,8 +55,8 @@ export const AnalyticsOverview = ({
       />
 
       <MetricsOverview 
-        metrics={metrics} 
-        getTrend={getTrend} 
+        metrics={metrics}
+        getTrend={getTrend}
       />
 
       <AnalyticsCharts 

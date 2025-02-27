@@ -1,11 +1,11 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { FormProfile } from "@/types/profile";
+import type { Client } from "@/types/auth";
 
 interface ProfileFormFieldsProps {
-  profile: FormProfile;
-  onProfileChange: (profile: FormProfile) => void;
+  profile: Client;
+  onProfileChange: (profile: Client) => void;
 }
 
 const ProfileFormFields = ({ profile, onProfileChange }: ProfileFormFieldsProps) => {
@@ -24,7 +24,7 @@ const ProfileFormFields = ({ profile, onProfileChange }: ProfileFormFieldsProps)
         <Input
           id="full_name"
           name="full_name"
-          value={profile.full_name}
+          value={profile.full_name || ""}
           onChange={handleChange}
           placeholder="Seu nome completo"
         />

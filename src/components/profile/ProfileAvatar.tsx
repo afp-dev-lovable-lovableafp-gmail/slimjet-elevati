@@ -1,96 +1,124 @@
 
 import { useState } from "react";
-import { Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Camera, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
-interface ProfileAvatarProps {
+export interface ProfileAvatarProps {
+  avatarUrl?: string;
+  onAvatarChange: (url: string | null) => void;
   userId: string;
-  avatarUrl?: string | null;
-  fullName: string;
-  onAvatarUpdate: (url: string) => void;
 }
 
-const ProfileAvatar = ({ userId, avatarUrl, fullName, onAvatarUpdate }: ProfileAvatarProps) => {
-  const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
+const ProfileAvatar = ({ avatarUrl, onAvatarChange, userId }: ProfileAvatarProps) => {
+  const [isUploading, setIsUploading] = useState(false);
 
-  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadAvatar = async (file: File) => {
+    if (!userId) {
+      toast.error("ID de usuário não encontrado");
+      return;
+    }
+
     try {
-      setUploading(true);
+      setIsUploading(true);
 
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error("Você precisa selecionar uma imagem para upload.");
+      // Verificar o tipo de arquivo
+      if (!file.type.startsWith("image/")) {
+        toast.error("Somente imagens são permitidas");
+        return;
       }
 
-      const file = event.target.files[0];
+      // Limitar o tamanho do arquivo (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("O arquivo deve ter menos de 2MB");
+        return;
+      }
+
+      // Gerar nome único para o arquivo
       const fileExt = file.name.split(".").pop();
-      const fileName = `${userId}/avatar.${fileExt}`;
+      const fileName = `${userId}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
 
-      console.log("Iniciando upload do avatar:", {
-        bucket: 'avatars',
-        fileName: fileName,
-        fileType: file.type,
-        fileSize: file.size
-      });
-
+      // Fazer upload para o Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { 
-          upsert: true,
-          cacheControl: '3600',
-          contentType: file.type
-        });
+        .from("user_avatars")
+        .upload(filePath, file);
 
       if (uploadError) {
-        console.error("Erro no upload:", uploadError);
         throw uploadError;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      // Obter URL pública do arquivo
+      const { data } = supabase.storage
+        .from("user_avatars")
+        .getPublicUrl(filePath);
 
-      console.log("Upload concluído. URL pública:", publicUrl);
+      // Atualizar o avatar do usuário
+      const { error: updateError } = await supabase
+        .from("clients")
+        .update({ avatar_url: data.publicUrl })
+        .eq("id", userId);
 
-      onAvatarUpdate(publicUrl);
+      if (updateError) {
+        throw updateError;
+      }
 
-      toast({
-        title: "Avatar atualizado com sucesso!",
-      });
+      onAvatarChange(data.publicUrl);
+      toast.success("Avatar atualizado com sucesso");
     } catch (error: any) {
-      console.error("Erro completo:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar avatar",
-        description: error.message,
-      });
+      console.error("Error updating avatar:", error);
+      toast.error("Erro ao atualizar avatar");
     } finally {
-      setUploading(false);
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      uploadAvatar(e.target.files[0]);
     }
   };
 
   return (
-    <div className="relative">
+    <div className="flex flex-col items-center space-y-4">
       <Avatar className="h-24 w-24">
-        <AvatarImage src={avatarUrl || undefined} />
-        <AvatarFallback>{fullName?.charAt(0).toUpperCase()}</AvatarFallback>
+        <AvatarImage src={avatarUrl} alt="Avatar" />
+        <AvatarFallback className="text-2xl">
+          {userId?.slice(0, 2).toUpperCase() || "?"}
+        </AvatarFallback>
       </Avatar>
-      <label 
-        htmlFor="avatar-upload" 
-        className="absolute bottom-0 right-0 p-1 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
-      >
-        <Camera className="h-4 w-4 text-white" />
+
+      <div className="flex items-center">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          disabled={isUploading}
+          onClick={() => document.getElementById("avatar-upload")?.click()}
+        >
+          {isUploading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <Camera className="h-4 w-4" />
+              Alterar foto
+            </>
+          )}
+        </Button>
         <input
           id="avatar-upload"
           type="file"
           accept="image/*"
-          onChange={uploadAvatar}
-          disabled={uploading}
+          onChange={handleFileChange}
           className="hidden"
         />
-      </label>
+      </div>
     </div>
   );
 };

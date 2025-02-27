@@ -3,33 +3,39 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Appointment } from "@/types/appointment";
 
-export const useAppointmentQuery = (userId?: string) => {
+export const useAppointmentQuery = (appointmentId?: string) => {
   return useQuery({
-    queryKey: ['appointments', userId],
+    queryKey: ["appointment", appointmentId],
     queryFn: async () => {
-      const query = supabase
-        .from('appointments')
+      if (!appointmentId) throw new Error("ID do agendamento não fornecido");
+
+      const { data, error } = await supabase
+        .from("appointments")
         .select(`
           *,
-          services (*),
-          profiles (
-            id,
-            full_name,
-            company_name
-          )
+          services:service_id(*),
+          profiles:user_id(*)
         `)
-        .order('scheduled_at', { ascending: true });
+        .eq("id", appointmentId);
 
-      if (userId) {
-        query.eq('user_id', userId);
+      if (error) {
+        console.error("Erro ao buscar agendamento:", error);
+        throw error;
       }
 
-      const { data, error } = await query;
+      if (!data || data.length === 0) {
+        throw new Error("Agendamento não encontrado");
+      }
 
-      if (error) throw error;
-      return data as Appointment[];
+      // Converter dados para o tipo Appointment
+      const appointments = data.map((item) => ({
+        ...item,
+        services: item.services || undefined,
+        profiles: item.profiles || undefined
+      })) as unknown as Appointment[];
+
+      return appointments[0];
     },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!appointmentId,
   });
 };

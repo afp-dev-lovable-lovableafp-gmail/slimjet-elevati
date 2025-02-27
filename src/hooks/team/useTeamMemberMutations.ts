@@ -19,7 +19,6 @@ export const useTeamMemberMutations = () => {
           description: data.description,
           linkedin_url: data.linkedin_url,
           photo_url: data.photo_url,
-          is_admin: data.is_admin,
           status: 'active'
         });
 
@@ -48,8 +47,7 @@ export const useTeamMemberMutations = () => {
           position: data.position,
           description: data.description,
           linkedin_url: data.linkedin_url,
-          photo_url: data.photo_url,
-          is_admin: data.is_admin
+          photo_url: data.photo_url
         })
         .eq('id', data.id);
 

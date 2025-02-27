@@ -1,101 +1,92 @@
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { handleError } from "@/utils/error-handler";
-import { ErrorCodes } from "@/types/error";
 import type { Appointment, AppointmentStatus } from "@/types/appointment";
-
-const GC_TIME = 1000 * 60 * 5; // 5 minutes
-const STALE_TIME = 1000 * 30; // 30 seconds
 
 export const useAdminAppointments = () => {
   const queryClient = useQueryClient();
 
-  const { data: appointments, isLoading, refetch } = useQuery({
-    queryKey: ["admin-appointments"],
+  const { data: appointments, isLoading, error } = useQuery({
+    queryKey: ["admin", "appointments"],
     queryFn: async () => {
-      try {
-        console.log("Buscando agendamentos...");
-        
-        const { data: appointmentsData, error } = await supabase
-          .from("appointments")
-          .select(`
-            id,
-            scheduled_at,
-            status,
-            meeting_url,
-            notes,
-            created_at,
-            updated_at,
-            services:service_id (
-              id,
-              name,
-              duration,
-              price
-            ),
-            profiles:user_id (
-              id,
-              full_name,
-              company_name
-            )
-          `)
-          .order("scheduled_at", { ascending: true });
+      const { data, error } = await supabase
+        .from("appointments")
+        .select(`
+          *,
+          services:service_id(*),
+          profiles:user_id(*)
+        `)
+        .order("scheduled_at", { ascending: false });
 
-        if (error) throw error;
-
-        return appointmentsData as Appointment[];
-      } catch (error) {
-        throw handleError(error, ErrorCodes.APPOINTMENTS.FETCH_FAILED);
+      if (error) {
+        console.error("Erro ao carregar agendamentos:", error);
+        throw error;
       }
+
+      return data.map((appointment) => ({
+        ...appointment,
+        services: appointment.services,
+        profiles: appointment.profiles,
+      })) as unknown as Appointment[];
     },
-    gcTime: GC_TIME,
-    staleTime: STALE_TIME,
-    retry: 2
   });
 
-  const handleStatusChange = async (appointmentId: string, newStatus: AppointmentStatus) => {
-    try {
+  const updateAppointmentStatus = useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: AppointmentStatus;
+    }) => {
       const { error } = await supabase
         .from("appointments")
-        .update({ status: newStatus })
-        .eq("id", appointmentId);
+        .update({ status })
+        .eq("id", id);
 
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+      toast.success("Status do agendamento atualizado com sucesso");
+    },
+    onError: (error: any) => {
+      console.error("Erro ao atualizar status:", error);
+      toast.error("Erro ao atualizar status do agendamento");
+    },
+  });
 
-      await queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
-      toast.success("Status atualizado com sucesso", {
-        description: "O agendamento foi atualizado com sucesso"
-      });
-    } catch (error) {
-      handleError(error, ErrorCodes.APPOINTMENTS.UPDATE_FAILED);
-    }
-  };
-
-  const handleDelete = async (appointmentId: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir este agendamento?")) return;
-
-    try {
+  const addMeetingLink = useMutation({
+    mutationFn: async ({
+      id,
+      meeting_url,
+    }: {
+      id: string;
+      meeting_url: string;
+    }) => {
       const { error } = await supabase
         .from("appointments")
-        .delete()
-        .eq("id", appointmentId);
+        .update({ meeting_url })
+        .eq("id", id);
 
       if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
-      toast.success("Agendamento excluído", {
-        description: "O agendamento foi removido com sucesso."
-      });
-    } catch (error) {
-      handleError(error, ErrorCodes.APPOINTMENTS.DELETE_FAILED);
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+      toast.success("Link de reunião adicionado com sucesso");
+    },
+    onError: (error: any) => {
+      console.error("Erro ao adicionar link:", error);
+      toast.error("Erro ao adicionar link de reunião");
+    },
+  });
 
   return {
     appointments,
     isLoading,
-    handleStatusChange,
-    handleDelete
+    error,
+    updateAppointmentStatus,
+    addMeetingLink,
   };
 };

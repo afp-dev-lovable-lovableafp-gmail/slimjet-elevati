@@ -2,20 +2,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { mapToDbMetric } from "@/utils/metrics/metricMappers";
-import type { CustomMetric } from "@/types/analytics";
+import type { 
+  AnalyticsMetric, 
+  CreateMetricDTO, 
+  UpdateMetricDTO 
+} from "@/types/analytics";
 
 export const useMetricMutations = () => {
   const queryClient = useQueryClient();
 
   const createMetric = useMutation({
-    mutationFn: async (data: Omit<CustomMetric, 'id'>) => {
-      const dbMetric = mapToDbMetric(data);
+    mutationFn: async (data: CreateMetricDTO) => {
       const { error } = await supabase
         .from('custom_metrics')
-        .insert(dbMetric);
+        .insert({
+          ...data,
+          is_active: true,
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating metric:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
@@ -28,14 +37,16 @@ export const useMetricMutations = () => {
   });
 
   const updateMetric = useMutation({
-    mutationFn: async (data: CustomMetric) => {
-      const dbMetric = mapToDbMetric(data);
+    mutationFn: async (data: UpdateMetricDTO) => {
       const { error } = await supabase
         .from('custom_metrics')
-        .update(dbMetric)
+        .update(data)
         .eq('id', data.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating metric:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
@@ -51,10 +62,13 @@ export const useMetricMutations = () => {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('custom_metrics')
-        .delete()
+        .update({ is_active: false })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting metric:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
@@ -66,9 +80,66 @@ export const useMetricMutations = () => {
     }
   });
 
+  const createMetricValue = useMutation({
+    mutationFn: async (data: {
+      custom_metric_id: string;
+      value: number;
+      change_percentage?: number;
+    }) => {
+      const { error } = await supabase
+        .from('analytics_metrics')
+        .insert({
+          custom_metric_id: data.custom_metric_id,
+          value: data.value,
+          change_percentage: data.change_percentage,
+          date: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error creating metric value:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['metrics'] });
+      toast.success("Valor da métrica registrado com sucesso!");
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao registrar valor da métrica");
+      console.error(error);
+    }
+  });
+
+  const updateMetricValue = useMutation({
+    mutationFn: async (data: AnalyticsMetric) => {
+      const { error } = await supabase
+        .from('analytics_metrics')
+        .update({
+          value: data.value,
+          change_percentage: data.change_percentage
+        })
+        .eq('id', data.id);
+
+      if (error) {
+        console.error('Error updating metric value:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['metrics'] });
+      toast.success("Valor da métrica atualizado com sucesso!");
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao atualizar valor da métrica");
+      console.error(error);
+    }
+  });
+
   return {
     createMetric,
     updateMetric,
-    deleteMetric
+    deleteMetric,
+    createMetricValue,
+    updateMetricValue
   };
 };

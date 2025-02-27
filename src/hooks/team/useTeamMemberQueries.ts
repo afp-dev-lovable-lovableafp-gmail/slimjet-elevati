@@ -1,64 +1,69 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import type { TeamMember, TeamMemberSpecialty } from "@/types/team";
+import type { TeamMember, DatabaseTeamMember } from "@/types/team";
 
-interface DatabaseTeamMember {
-  id: string;
-  first_name: string;
-  middle_name: string | null;
-  last_name: string;
-  position: string;
-  description: string | null;
-  photo_url: string | null;
-  linkedin_url: string | null;
-  status: 'active' | 'inactive';
-  is_admin: boolean;
-  team_member_specialties: {
-    id: string;
-    specialty_id: string;
-    team_member_id: string;
-    specialties: {
-      id: string;
-      name: string;
-    };
-  }[];
-}
-
-export const useTeamMemberQueries = () => {
+export const useTeamMemberById = (memberId?: string) => {
   return useQuery({
-    queryKey: ['team-members'],
+    queryKey: ["team_member", memberId],
     queryFn: async () => {
+      if (!memberId) {
+        throw new Error("ID do membro da equipe não fornecido");
+      }
+
       const { data, error } = await supabase
-        .from('team_members')
-        .select(`
+        .from("team_members")
+        .select(
+          `
           *,
-          team_member_specialties (
-            id,
-            specialty_id,
-            team_member_id,
-            specialties (
-              id,
-              name
-            )
+          team_member_specialties(
+            *,
+            specialties(*)
           )
-        `)
-        .eq('status', 'active')
-        .order('first_name');
+        `
+        )
+        .eq("id", memberId)
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar membro da equipe:", error);
+        throw error;
+      }
 
-      const formattedData = (data as DatabaseTeamMember[]).map(member => ({
-        ...member,
-        team_member_specialties: member.team_member_specialties.map(specialty => ({
-          id: specialty.id,
-          team_member_id: specialty.team_member_id,
-          specialty_id: specialty.specialty_id,
-          specialties: specialty.specialties
-        }))
-      })) as TeamMember[];
+      return data as unknown as TeamMember;
+    },
+    enabled: !!memberId,
+  });
+};
 
-      return formattedData;
-    }
+export const useTeamMembers = (active: boolean = true) => {
+  return useQuery({
+    queryKey: ["team_members", { active }],
+    queryFn: async () => {
+      let query = supabase
+        .from("team_members")
+        .select(
+          `
+          *,
+          team_member_specialties(
+            *,
+            specialties(*)
+          )
+        `
+        );
+
+      if (active) {
+        query = query.eq("status", "active");
+      }
+
+      const { data, error } = await query.order("first_name");
+
+      if (error) {
+        console.error("Erro ao buscar membros da equipe:", error);
+        throw error;
+      }
+
+      return data as unknown as TeamMember[];
+    },
   });
 };

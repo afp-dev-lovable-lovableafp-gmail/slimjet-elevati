@@ -1,44 +1,49 @@
 
-import { useState } from "react";
-import type { CustomMetric } from "@/types/analytics";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import type { DbCustomMetric } from "@/types/analytics";
 
 export const useCustomMetricsState = () => {
-  const [selectedMetric, setSelectedMetric] = useState<CustomMetric | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const openForm = (metric?: CustomMetric) => {
-    if (metric) {
-      setSelectedMetric(metric);
+  const { data: metrics, isLoading, error } = useQuery({
+    queryKey: ['custom-metrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custom_metrics')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching custom metrics:', error);
+        throw error;
+      }
+
+      return data as DbCustomMetric[];
     }
-    setIsFormOpen(true);
-  };
+  });
 
-  const closeForm = () => {
-    setIsFormOpen(false);
-    setSelectedMetric(null);
-  };
+  const prefetchMetric = async (id: string) => {
+    await queryClient.prefetchQuery({
+      queryKey: ['custom-metrics', id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('custom_metrics')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-  const openDeleteDialog = (metric: CustomMetric) => {
-    setSelectedMetric(metric);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const closeDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setSelectedMetric(null);
+        if (error) throw error;
+        return data;
+      }
+    });
   };
 
   return {
-    selectedMetric,
-    setSelectedMetric,
-    isFormOpen,
-    setIsFormOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    openForm,
-    closeForm,
-    openDeleteDialog,
-    closeDeleteDialog
+    metrics,
+    isLoading,
+    error,
+    prefetchMetric
   };
 };

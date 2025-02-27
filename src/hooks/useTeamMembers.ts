@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { useTeamMemberQueries } from "./team/useTeamMemberQueries";
+import { useTeamMembers as useTeamMembersQuery } from "./team/useTeamMemberQueries";
 import { useTeamMemberMutations } from "./team/useTeamMemberMutations";
 import { useTeamMemberState } from "./team/useTeamMemberState";
 import { useSpecialtyState } from "./team/useSpecialtyState";
@@ -8,7 +8,7 @@ import { useTeamMemberActions } from "./team/useTeamMemberActions";
 import type { TeamMember } from "@/types/team";
 
 export const useTeamMembers = () => {
-  const { data: members, isLoading, error, refetch } = useTeamMemberQueries();
+  const { data: members, isLoading, error, refetch } = useTeamMembersQuery();
   const { deleteMember } = useTeamMemberMutations();
   const memberState = useTeamMemberState();
   const specialtyState = useSpecialtyState();

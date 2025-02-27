@@ -1,54 +1,80 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import type { Appointment, AppointmentFilters } from "@/types/appointment";
+import { useAuth } from "@/hooks/useAuth";
+import type { Appointment } from "@/types/appointment";
 
-export const useAppointmentQueries = (userId?: string, filters?: AppointmentFilters) => {
-  return useQuery({
-    queryKey: ['appointments', userId, filters],
-    queryFn: async () => {
-      let query = supabase
-        .from('appointments')
-        .select(`
-          *,
-          services (
-            id,
-            name,
-            duration,
-            price
-          ),
-          profiles (
-            id,
-            full_name,
-            company_name
-          )
-        `);
+export const useAppointmentQueries = () => {
+  const { user } = useAuth();
 
-      if (userId) {
-        query = query.eq('user_id', userId);
-      }
+  // Query para buscar todos os agendamentos do usuário atual
+  const useUserAppointments = () => {
+    return useQuery({
+      queryKey: ["appointments", "user", user?.id],
+      queryFn: async () => {
+        if (!user?.id) throw new Error("Usuário não autenticado");
 
-      if (filters?.status?.length) {
-        query = query.in('status', filters.status);
-      }
+        const { data, error } = await supabase
+          .from("appointments")
+          .select(`
+            *,
+            services:service_id(*),
+            profiles:user_id(*)
+          `)
+          .eq("user_id", user.id)
+          .order("scheduled_at", { ascending: true });
 
-      if (filters?.startDate) {
-        query = query.gte('scheduled_at', filters.startDate.toISOString());
-      }
+        if (error) {
+          console.error("Erro ao buscar agendamentos:", error);
+          throw error;
+        }
 
-      if (filters?.endDate) {
-        query = query.lte('scheduled_at', filters.endDate.toISOString());
-      }
+        // Converter dados para o tipo Appointment
+        const appointments = data.map((item) => ({
+          ...item,
+          services: item.services || undefined,
+          profiles: item.profiles || undefined
+        })) as unknown as Appointment[];
 
-      if (filters?.serviceId) {
-        query = query.eq('service_id', filters.serviceId);
-      }
+        return appointments;
+      },
+      enabled: !!user?.id,
+    });
+  };
 
-      const { data, error } = await query.order('scheduled_at');
+  // Query para buscar todos os agendamentos (admin)
+  const useAllAppointments = () => {
+    return useQuery({
+      queryKey: ["appointments", "all"],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("appointments")
+          .select(`
+            *,
+            services:service_id(*),
+            profiles:user_id(*)
+          `)
+          .order("scheduled_at", { ascending: true });
 
-      if (error) throw error;
-      return data as Appointment[];
-    },
-    enabled: !!userId
-  });
+        if (error) {
+          console.error("Erro ao buscar agendamentos:", error);
+          throw error;
+        }
+
+        // Converter dados para o tipo Appointment
+        const appointments = data.map((item) => ({
+          ...item,
+          services: item.services || undefined,
+          profiles: item.profiles || undefined
+        })) as unknown as Appointment[];
+
+        return appointments;
+      },
+    });
+  };
+
+  return {
+    useUserAppointments,
+    useAllAppointments,
+  };
 };

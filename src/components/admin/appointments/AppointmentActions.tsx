@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import type { AppointmentStatus } from "@/types/appointment";
+import { AppointmentStatus } from "@/types/appointment";
 
 interface AppointmentActionsProps {
   id: string;

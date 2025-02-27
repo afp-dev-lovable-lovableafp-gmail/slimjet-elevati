@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
+import { logger } from "@/features/logging/logger";
 
 type SessionStatus = 'pending' | 'authenticated' | 'unauthenticated';
 
@@ -15,11 +16,10 @@ export const useSession = () => {
       setSession(initialSession);
       setStatus(initialSession ? 'authenticated' : 'unauthenticated');
       
-      console.log("[Auth] Estado inicial:", {
+      logger.info("auth", "Estado inicial da sessão:", {
         event: "INITIAL_SESSION",
         userId: initialSession?.user?.id,
-        status: initialSession ? 'authenticated' : 'unauthenticated',
-        timestamp: new Date().toISOString()
+        status: initialSession ? 'authenticated' : 'unauthenticated'
       });
     });
 
@@ -28,11 +28,10 @@ export const useSession = () => {
       setSession(session);
       setStatus(session ? 'authenticated' : 'unauthenticated');
       
-      console.log("[Auth] Estado alterado:", {
+      logger.info("auth", "Estado da sessão alterado:", {
         event: _event,
         userId: session?.user?.id,
-        status: session ? 'authenticated' : 'unauthenticated',
-        timestamp: new Date().toISOString()
+        status: session ? 'authenticated' : 'unauthenticated'
       });
     });
 

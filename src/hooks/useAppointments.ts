@@ -5,17 +5,13 @@ import { useAppointmentQueries } from "./appointments/useAppointmentQueries";
 import { useAppointmentActions } from "./appointments/useAppointmentActions";
 import { useAppointmentState } from "./appointments/useAppointmentState";
 import { toast } from "sonner";
-import type { CreateAppointmentDTO, Appointment, AppointmentStatus } from "@/types/appointment";
+import type { Appointment, AppointmentStatus, CreateAppointmentDTO } from "@/types/appointment";
 
 export const useAppointments = () => {
   const { user } = useAuth();
-  const { 
-    data: appointments, 
-    isLoading, 
-    error,
-    refetch 
-  } = useAppointmentQueries(user?.id);
-
+  const appointmentQueries = useAppointmentQueries();
+  const userAppointmentsQuery = appointmentQueries.useUserAppointments();
+  
   const {
     createAppointment,
     updateAppointment,
@@ -47,7 +43,7 @@ export const useAppointments = () => {
       });
 
       closeForm();
-      await refetch();
+      await userAppointmentsQuery.refetch();
 
       return true;
     } catch (error: any) {
@@ -57,7 +53,7 @@ export const useAppointments = () => {
       });
       return false;
     }
-  }, [user?.id, createAppointment, closeForm, refetch]);
+  }, [user?.id, createAppointment, closeForm, userAppointmentsQuery]);
 
   const handleUpdate = useCallback(async (appointmentId: string, data: Partial<Appointment>) => {
     try {
@@ -66,7 +62,7 @@ export const useAppointments = () => {
         ...data
       });
 
-      await refetch();
+      await userAppointmentsQuery.refetch();
       return true;
     } catch (error: any) {
       console.error("[Appointments] Erro ao atualizar:", error);
@@ -75,13 +71,13 @@ export const useAppointments = () => {
       });
       return false;
     }
-  }, [updateAppointment, refetch]);
+  }, [updateAppointment, userAppointmentsQuery]);
 
   const handleCancel = useCallback(async (appointmentId: string) => {
     try {
       await cancelAppointment.mutateAsync(appointmentId);
       closeCancelDialog();
-      await refetch();
+      await userAppointmentsQuery.refetch();
 
       return true;
     } catch (error: any) {
@@ -91,13 +87,14 @@ export const useAppointments = () => {
       });
       return false;
     }
-  }, [cancelAppointment, closeCancelDialog, refetch]);
+  }, [cancelAppointment, closeCancelDialog, userAppointmentsQuery]);
 
   return {
     // Estado dos agendamentos
-    appointments,
-    isLoading,
-    error,
+    appointments: userAppointmentsQuery.data,
+    isLoading: userAppointmentsQuery.isLoading,
+    error: userAppointmentsQuery.error,
+    refetch: userAppointmentsQuery.refetch,
     
     // Estado do formulário/diálogo
     selectedAppointment,

@@ -12,8 +12,7 @@ const teamMemberSchema = z.object({
   last_name: z.string().min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
   position: z.string().min(2, "Cargo deve ter pelo menos 2 caracteres"),
   description: z.string().optional(),
-  linkedin_url: z.string().url("URL do LinkedIn inválida").optional().or(z.literal("")),
-  is_admin: z.boolean().optional()
+  linkedin_url: z.string().url("URL do LinkedIn inválida").optional().or(z.literal(""))
 });
 
 export const useTeamMemberFormActions = () => {
@@ -40,8 +39,7 @@ export const useTeamMemberFormActions = () => {
       last_name: validatedData.last_name,
       position: validatedData.position,
       description: validatedData.description,
-      linkedin_url: validatedData.linkedin_url,
-      is_admin: validatedData.is_admin
+      linkedin_url: validatedData.linkedin_url
     };
 
     if (formData.id) {

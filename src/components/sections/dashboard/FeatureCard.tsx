@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -11,32 +11,27 @@ interface FeatureCardProps {
   onClick: () => void;
 }
 
-export const FeatureCard = ({ 
-  icon: Icon, 
-  title, 
-  description, 
-  action, 
-  onClick 
+export const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+  action,
+  onClick
 }: FeatureCardProps) => {
   return (
-    <Card className="p-6 transition-all hover:shadow-lg">
-      <div className="flex flex-col h-full">
-        <div className="p-2 bg-blue-100 rounded-lg w-fit mb-4">
-          <Icon className="h-6 w-6 text-blue-600" />
+    <Card className="p-6 space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <Icon className="h-6 w-6 text-primary" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          {title}
-        </h2>
-        <p className="text-gray-600 mb-6 flex-grow">
-          {description}
-        </p>
-        <Button 
-          onClick={onClick}
-          className="w-full justify-center"
-        >
-          {action}
-        </Button>
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
       </div>
+      <Button onClick={onClick} variant="outline" className="w-full">
+        {action}
+      </Button>
     </Card>
   );
 };

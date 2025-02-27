@@ -1,7 +1,6 @@
 
 import { supabase } from "@/lib/supabase";
-import type { Profile } from "@/types/auth";
-import type { AuthError } from "@supabase/supabase-js";
+import type { Profile, Client } from "@/types/auth";
 
 export const fetchUserProfile = async (userId: string): Promise<Profile | null> => {
   if (!userId) {
@@ -10,20 +9,28 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
   }
 
   try {
+    // Buscar o perfil base
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
-      .maybeSingle();
+      .single();
 
     if (profileError) {
       console.error("Erro ao buscar perfil:", profileError);
       throw profileError;
     }
 
-    if (!profileData) {
-      console.log("Nenhum perfil encontrado para o userId:", userId);
-      return null;
+    // Buscar dados do cliente associado
+    const { data: clientData, error: clientError } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (clientError && clientError.code !== 'PGRST116') { // Ignora erro de não encontrado
+      console.error("Erro ao buscar dados do cliente:", clientError);
+      throw clientError;
     }
 
     // Verificar se é admin
@@ -31,10 +38,14 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       user_id: userId
     });
 
-    return {
+    // Combinar os dados
+    const enhancedProfile: Profile = {
       ...profileData,
-      is_admin: isAdmin
-    } as Profile;
+      is_admin: isAdmin,
+      client: clientData || null,
+    };
+
+    return enhancedProfile;
   } catch (error) {
     console.error("Erro ao buscar perfil:", error);
     throw error;

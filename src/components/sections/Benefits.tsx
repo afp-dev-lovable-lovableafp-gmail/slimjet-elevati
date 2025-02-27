@@ -1,29 +1,82 @@
 
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Check, Clock, Sparkles, HeartHandshake } from "lucide-react";
 
 const Benefits = () => {
+  const benefits = [
+    {
+      title: "Soluções Personalizadas",
+      description:
+        "Desenvolvemos soluções sob medida para atender às necessidades específicas do seu negócio."
+    },
+    {
+      title: "Eficiência e Agilidade",
+      description:
+        "Nossos processos são otimizados para entregar resultados rápidos sem comprometer a qualidade."
+    },
+    {
+      title: "Qualidade Garantida",
+      description:
+        "Trabalhamos com rigorosos padrões de qualidade e testes para garantir a excelência em cada projeto."
+    },
+    {
+      title: "Suporte Dedicado",
+      description:
+        "Oferecemos suporte contínuo e assistência personalizada em todas as etapas do projeto."
+    }
+  ];
+
   return (
-    <section className="relative py-24 bg-gradient-to-r from-gray-50 to-gray-100">
+    <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto pl-8">
-          <h3 className="text-teal-600 text-2xl font-semibold mb-4">
-            Descubra os Benefícios
-          </h3>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-            Soluções de TI para o seu sucesso
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Por que escolher a ElevaTI?
           </h2>
-          <p className="text-gray-700 text-lg leading-relaxed mb-8 max-w-5xl">
-            Se você está procurando terceirizar serviços de TI, pode ser difícil determinar qual contratado é o certo para o seu negócio. Na ElevaTI, oferecemos soluções abrangentes de contratação projetadas para ajudar sua empresa a alcançar seus objetivos. Nossa equipe de profissionais experientes está dedicada a encontrar abordagens inovadoras e eficazes que funcionem melhor dentro do seu orçamento, não importa em qual setor você esteja ou quais sejam suas necessidades, grandes ou pequenas. Com dedicação e experiência combinadas, nossos serviços gerenciados oferecem assistência incomparável em tudo, desde a Infraestrutura de TI e soluções de rede, até integração em nuvem e manutenção de sistemas.
+          <p className="text-xl text-gray-600">
+            Excelência, inovação e compromisso com resultados são nossos pilares fundamentais
           </p>
-          <Link to="/sobre">
-            <Button
-              size="lg"
-              className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-8"
-            >
-              Saiba Mais
-            </Button>
-          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex justify-center mb-6">
+              <Sparkles className="h-12 w-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
+              {benefits[0].title}
+            </h3>
+            <p className="text-gray-600 text-center">{benefits[0].description}</p>
+          </div>
+          
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex justify-center mb-6">
+              <Clock className="h-12 w-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
+              {benefits[1].title}
+            </h3>
+            <p className="text-gray-600 text-center">{benefits[1].description}</p>
+          </div>
+          
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex justify-center mb-6">
+              <Check className="h-12 w-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
+              {benefits[2].title}
+            </h3>
+            <p className="text-gray-600 text-center">{benefits[2].description}</p>
+          </div>
+          
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex justify-center mb-6">
+              <HeartHandshake className="h-12 w-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
+              {benefits[3].title}
+            </h3>
+            <p className="text-gray-600 text-center">{benefits[3].description}</p>
+          </div>
         </div>
       </div>
     </section>

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
-import ProfileForm from '../ProfileForm';
+import { ProfileForm } from '../ProfileForm';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -47,7 +47,20 @@ describe('ProfileForm', () => {
   });
 
   it('deve renderizar o formulário com os dados do perfil', async () => {
-    renderWithProviders(<ProfileForm />);
+    renderWithProviders(
+      <ProfileForm 
+        initialData={{
+          id: '123',
+          full_name: 'John Doe',
+          company_name: 'Test Company',
+          phone: '(11)99999-9999',
+          avatar_url: null,
+          email: 'test@example.com'
+        }} 
+        onSubmit={() => {}} 
+        isLoading={false} 
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
@@ -57,7 +70,22 @@ describe('ProfileForm', () => {
   });
 
   it('deve permitir atualização dos dados do perfil', async () => {
-    renderWithProviders(<ProfileForm />);
+    const onSubmitMock = vi.fn();
+    
+    renderWithProviders(
+      <ProfileForm 
+        initialData={{
+          id: '123',
+          full_name: 'John Doe',
+          company_name: 'Test Company',
+          phone: '(11)99999-9999',
+          avatar_url: null,
+          email: 'test@example.com'
+        }} 
+        onSubmit={onSubmitMock} 
+        isLoading={false} 
+      />
+    );
 
     const fullNameInput = await screen.findByDisplayValue('John Doe');
     await userEvent.clear(fullNameInput);
@@ -66,21 +94,6 @@ describe('ProfileForm', () => {
     const submitButton = screen.getByRole('button', { name: /salvar/i });
     await userEvent.click(submitButton);
 
-    expect(supabase.from).toHaveBeenCalledWith('clients');
-  });
-
-  it('deve mostrar erro quando a atualização falha', async () => {
-    (supabase.from as any)().update.mockResolvedValue({
-      error: new Error('Erro ao atualizar perfil'),
-    });
-
-    renderWithProviders(<ProfileForm />);
-
-    const submitButton = screen.getByRole('button', { name: /salvar/i });
-    await userEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/erro ao atualizar perfil/i)).toBeInTheDocument();
-    });
+    expect(onSubmitMock).toHaveBeenCalled();
   });
 });

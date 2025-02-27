@@ -2,18 +2,18 @@
 import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { AuthFormData } from "./types";
+import { AuthFormData } from "@/types/auth";
 
 interface LoginFieldsProps {
   register: UseFormRegister<AuthFormData>;
   errors: FieldErrors<AuthFormData>;
-  isRegistering: boolean;
+  isRegistering?: boolean;
 }
 
 export const LoginFields: React.FC<LoginFieldsProps> = ({
   register,
   errors,
-  isRegistering,
+  isRegistering
 }) => {
   return (
     <>
@@ -45,7 +45,7 @@ export const LoginFields: React.FC<LoginFieldsProps> = ({
           })}
           placeholder="Senha"
           type="password"
-          autoComplete={isRegistering ? "new-password" : "current-password"}
+          autoComplete="current-password"
         />
         {errors.password && (
           <span className="text-sm text-red-500">{errors.password.message}</span>

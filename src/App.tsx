@@ -1,69 +1,142 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { 
+  createBrowserRouter, 
+  RouterProvider, 
+  Navigate,
+  Outlet
+} from 'react-router-dom';
+import { AuthProvider } from '@/hooks/useAuth';
+import { Toaster } from 'sonner';
+import Auth from './pages/Auth';
 import Index from './pages/Index';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Services from './pages/Services';
 import Team from './pages/Team';
 import NotFound from './pages/NotFound';
-import Auth from './pages/Auth';
-import AdminAuth from './pages/AdminAuth';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Appointments from './pages/Appointments';
-import Booking from './pages/Booking';
-import ManagerAdmin from './pages/ManagerAdmin';
-import CustomFields from './pages/manager-admin/CustomFields';
-import DocumentTemplates from './pages/manager-admin/DocumentTemplates';
-import CustomMetrics from './pages/manager-admin/CustomMetrics';
-import CustomReports from './pages/manager-admin/CustomReports';
-import Analytics from './pages/manager-admin/Analytics';
-import { default as AdminServices } from './pages/manager-admin/Services';
-import TeamMembers from './pages/manager-admin/TeamMembers';
-import AdminAppointments from './pages/manager-admin/Appointments';
-import Settings from './pages/manager-admin/Settings';
-import Users from './pages/manager-admin/Users';
-import { Toaster } from '@/components/ui/toaster';
+import Dashboard from './pages/client/Dashboard';
+import Profile from './pages/client/Profile';
+import Booking from './pages/client/Booking';
+import Appointments from './pages/client/Appointments';
+import { useAuth } from './hooks/useAuth';
+import { Suspense, lazy } from 'react';
+import ClientLayout from './components/layouts/ClientLayout';
+import { supabase } from '@/lib/supabase';
+
+// Componente para rotas protegidas (autenticadas)
+const ProtectedLayout = () => {
+  const { loading, authenticated } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Layout padrão para páginas públicas
+const PublicLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Outlet />
+    </div>
+  );
+};
+
+// Helper de redirecionamento
+function redirect(to: string) {
+  return { redirect: to };
+}
+
+// Definição de rotas
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <PublicLayout />,
+    children: [
+      {
+        index: true,
+        element: <Index />,
+      },
+      {
+        path: 'about',
+        element: <About />,
+      },
+      {
+        path: 'contact',
+        element: <Contact />,
+      },
+      {
+        path: 'services',
+        element: <Services />,
+      },
+      {
+        path: 'team',
+        element: <Team />,
+      },
+    ]
+  },
+  {
+    path: '/auth',
+    element: <Auth />,
+    loader: async () => {
+      // Se o usuário já estiver logado, redirecionar para o dashboard
+      const session = await supabase.auth.getSession();
+      if (session.data.session) {
+        return redirect('/client/dashboard');
+      }
+      return null;
+    }
+  },
+  {
+    path: '/client',
+    element: <ProtectedLayout />,
+    errorElement: <Navigate to="/auth" replace />,
+    children: [
+      {
+        path: '',
+        element: <ClientLayout />,
+        children: [
+          { 
+            path: 'dashboard', 
+            element: <Dashboard />,
+          },
+          {
+            path: 'profile',
+            element: <Profile />,
+          },
+          {
+            path: 'booking',
+            element: <Booking />,
+          },
+          {
+            path: 'appointments',
+            element: <Appointments />,
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: '*',
+    element: <NotFound />
+  }
+]);
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Index />} />
-        <Route path="/sobre" element={<About />} />
-        <Route path="/contato" element={<Contact />} />
-        <Route path="/servicos" element={<Services />} />
-        <Route path="/time" element={<Team />} />
-        
-        {/* Authentication Routes */}
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/admin-auth" element={<AdminAuth />} />
-        
-        {/* User Routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/perfil" element={<Profile />} />
-        <Route path="/agendamentos" element={<Appointments />} />
-        <Route path="/agendar" element={<Booking />} />
-        
-        {/* Admin Routes */}
-        <Route path="/manager-admin" element={<ManagerAdmin />} />
-        <Route path="/manager-admin/campos-personalizados" element={<CustomFields />} />
-        <Route path="/manager-admin/modelos-documentos" element={<DocumentTemplates />} />
-        <Route path="/manager-admin/metricas-personalizadas" element={<CustomMetrics />} />
-        <Route path="/manager-admin/relatorios-personalizados" element={<CustomReports />} />
-        <Route path="/manager-admin/analytics" element={<Analytics />} />
-        <Route path="/manager-admin/servicos" element={<AdminServices />} />
-        <Route path="/manager-admin/time" element={<TeamMembers />} />
-        <Route path="/manager-admin/agendamentos" element={<AdminAppointments />} />
-        <Route path="/manager-admin/configuracoes" element={<Settings />} />
-        <Route path="/manager-admin/usuarios" element={<Users />} />
-        
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Router>
+    <AuthProvider>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </AuthProvider>
   );
 }
 

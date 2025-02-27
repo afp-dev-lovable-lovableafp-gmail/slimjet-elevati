@@ -1,41 +1,41 @@
 
 export type MetricTrend = "up" | "down" | "neutral";
 
-// Interface que reflete a estrutura exata da tabela custom_metrics no Supabase
+export interface AnalyticsMetric {
+  id: string;
+  custom_metric_id: string;
+  value: number;
+  change_percentage: number | null;
+  date: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbCustomMetric {
   id: string;
   name: string;
   description: string | null;
-  calculation_method: string | null;
   metric_type: string;
-  is_active: boolean | null;
+  calculation_method: string | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
+  created_by: string;
+  analytics_metrics: AnalyticsMetric[];
 }
 
-// Interface para uso na aplicação
 export interface CustomMetric {
   id: string;
   name: string;
   description: string | null;
-  category: string | null;
+  category: string;
   display_order: number;
   value: number | null;
-  trend: MetricTrend | null;
+  trend: MetricTrend;
   change_percentage: number | null;
   created_at: string;
   updated_at: string;
-}
-
-export interface AnalyticsMetric {
-  id: string;
-  metric_id: string;
-  value: number;
-  trend: MetricTrend;
-  change_percentage: number;
-  date: string;
-  created_at: string;
-  updated_at: string;
+  is_active?: boolean;
 }
 
 export interface PageVisit {
@@ -43,7 +43,7 @@ export interface PageVisit {
   page_path: string;
   count: number;
   visit_date: string;
-  visit_hour: number;
+  visit_hour?: number;
   created_at?: string;
   updated_at?: string | null;
 }
@@ -93,4 +93,16 @@ export interface AnalyticsMetrics {
 
 export interface AnalyticsResponse extends SiteAnalytics {
   metrics?: AnalyticsMetrics;
+}
+
+export interface CreateMetricDTO {
+  name: string;
+  description?: string | null;
+  metric_type: string;
+  calculation_method?: string | null;
+}
+
+export interface UpdateMetricDTO extends Partial<CreateMetricDTO> {
+  id: string;
+  is_active?: boolean;
 }

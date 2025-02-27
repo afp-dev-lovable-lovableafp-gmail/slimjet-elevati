@@ -1,10 +1,12 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProfileForm from "@/components/profile/ProfileForm";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { useProfileForm } from "@/hooks/profile/useProfileForm";
 
 const ProfileSection = () => {
   const navigate = useNavigate();
+  const { profile, isLoading, updateProfile } = useProfileForm();
 
   return (
     <div className="min-h-screen bg-gray-50 py-20">
@@ -16,7 +18,11 @@ const ProfileSection = () => {
           <ArrowLeft className="w-5 h-5 mr-2" />
           Voltar
         </button>
-        <ProfileForm />
+        <ProfileForm 
+          initialData={profile} 
+          onSubmit={updateProfile} 
+          isLoading={isLoading} 
+        />
       </div>
     </div>
   );

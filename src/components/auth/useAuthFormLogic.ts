@@ -41,23 +41,25 @@ export const useAuthFormLogic = (isAdmin?: boolean) => {
         if (authError) throw authError;
 
         if (authData.user) {
-          const { error: clientError } = await supabase
-            .from('clients')
+          // Criar perfil com user_type='client'
+          const { error: profileError } = await supabase
+            .from('profiles')
             .insert([
               {
+                id: authData.user.id,
                 full_name: data.fullName,
                 phone: data.phone,
-                email: data.email,
-                auth_id: authData.user.id,
-                user_type: 'client'
+                company_name: null,
+                user_type: 'client',
+                is_admin: false
               }
             ]);
 
-          if (clientError) throw clientError;
+          if (profileError) throw profileError;
 
           reset();
           setIsRegistering(false);
-          toast("Cadastro realizado com sucesso!", {
+          toast.success("Cadastro realizado com sucesso!", {
             description: "Você já pode fazer login para continuar."
           });
         }
@@ -69,27 +71,12 @@ export const useAuthFormLogic = (isAdmin?: boolean) => {
       const { data: sessionData } = await supabase.auth.getSession();
       
       if (sessionData?.session?.user) {
-        if (isAdmin) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', sessionData.session.user.id)
-            .single();
-
-          if (profileData?.is_admin) {
-            navigate("/manager-admin", { replace: true });
-          } else {
-            toast("Acesso negado", {
-              description: "Você não tem permissão para acessar a área administrativa."
-            });
-          }
-        } else {
-          navigate("/dashboard", { replace: true });
-        }
+        // O redirecionamento será feito pelos componentes Auth ou AdminAuth
+        // baseado no tipo de usuário e permissões
       }
     } catch (error: any) {
       console.error("Erro no formulário:", error);
-      toast("Erro no cadastro", {
+      toast.error("Erro no formulário", {
         description: error.message || "Verifique suas informações e tente novamente."
       });
     }
@@ -106,4 +93,3 @@ export const useAuthFormLogic = (isAdmin?: boolean) => {
     onSubmit
   };
 };
-

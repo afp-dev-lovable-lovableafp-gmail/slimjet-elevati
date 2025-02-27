@@ -1,43 +1,71 @@
 
+import { Button } from "@/components/ui/button";
+import { LoginFields } from "@/components/auth/LoginFields";
+import { Loader2 } from "lucide-react";
+import { AuthFormData } from "@/types/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginFields } from "./LoginFields";
-import { FormButtons } from "./FormButtons";
-import { authSchema, type AuthFormData } from "@/validations/schemas";
-import { useAuth } from "@/hooks/useAuth";
+import { authSchema } from "@/validations/schemas";
 
 interface LoginFormProps {
+  onSubmit: (data: AuthFormData) => Promise<void>;
+  isLoading: boolean;
   onToggleMode: () => void;
   hideToggle?: boolean;
 }
 
-export const LoginForm = ({ onToggleMode, hideToggle }: LoginFormProps) => {
-  const { signIn } = useAuth();
+export const LoginForm = ({ 
+  onSubmit, 
+  isLoading, 
+  onToggleMode, 
+  hideToggle = false 
+}: LoginFormProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: { errors }
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema)
   });
 
-  const onSubmit = async (data: AuthFormData) => {
-    await signIn(data.email!, data.password!);
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <LoginFields 
         register={register} 
         errors={errors} 
         isRegistering={false}
       />
-      <FormButtons
-        isSubmitting={isSubmitting}
-        isRegistering={false}
-        onToggleMode={onToggleMode}
-        hideToggle={hideToggle}
-      />
+      
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Entrando...
+          </>
+        ) : (
+          "Entrar"
+        )}
+      </Button>
+      
+      {!hideToggle && (
+        <div className="text-center mt-4">
+          <p className="text-sm text-muted-foreground">
+            Não tem uma conta?{" "}
+            <Button
+              variant="link"
+              className="p-0 h-auto"
+              onClick={onToggleMode}
+              type="button"
+            >
+              Cadastre-se
+            </Button>
+          </p>
+        </div>
+      )}
     </form>
   );
 };
