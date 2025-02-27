@@ -13,6 +13,17 @@ export interface Profile {
   updated_at?: string;
 }
 
+export interface Client {
+  id: string;
+  full_name: string;
+  company_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  email: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface AuthFormData {
   email: string;
   password: string;
@@ -24,9 +35,11 @@ export interface AuthFormData {
 export interface AuthState {
   user: User | null;
   profile: Profile | null;
+  client: Client | null;
   loading: boolean;
   initialized: boolean;
   authenticated: boolean;
+  error?: Error | null;
 }
 
 export interface OAuthLoginParams {

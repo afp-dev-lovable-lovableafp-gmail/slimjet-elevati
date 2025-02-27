@@ -26,7 +26,14 @@ export const RegisterForm = ({
     formState: { errors },
     watch
   } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema)
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      phone: ""
+    }
   });
   
   return (

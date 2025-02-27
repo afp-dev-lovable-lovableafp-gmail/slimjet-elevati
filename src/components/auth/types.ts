@@ -1,13 +1,6 @@
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-
-export interface AuthFormData {
-  email?: string;
-  password?: string;
-  fullName?: string;
-  phone?: string;
-  confirmPassword?: string;
-}
+import { AuthFormData } from "@/types/auth";
 
 export interface AuthFormProps {
   isAdmin?: boolean;

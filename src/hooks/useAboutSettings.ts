@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import type { AboutSettings, AboutSettingsFormData } from "@/types/about";
+import type { AboutSettings, AboutSettingsFormValues } from "@/types/about";
 
 export const useAboutSettings = () => {
   const [settings, setSettings] = useState<AboutSettings | null>(null);
@@ -32,7 +32,7 @@ export const useAboutSettings = () => {
     }
   };
 
-  const updateSettings = async (formData: AboutSettingsFormData) => {
+  const updateSettings = async (formData: AboutSettingsFormValues) => {
     try {
       setLoading(true);
 

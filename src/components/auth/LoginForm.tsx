@@ -25,7 +25,11 @@ export const LoginForm = ({
     handleSubmit,
     formState: { errors }
   } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema)
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
   });
 
   return (

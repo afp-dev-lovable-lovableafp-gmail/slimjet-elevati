@@ -42,7 +42,6 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
     const enhancedProfile: Profile = {
       ...profileData,
       is_admin: isAdmin,
-      client: clientData || null,
     };
 
     return enhancedProfile;

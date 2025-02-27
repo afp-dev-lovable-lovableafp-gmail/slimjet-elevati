@@ -6,15 +6,19 @@ import { AuthState } from '@/types/auth';
 const initialState: AuthState = {
   user: null,
   profile: null,
+  client: null,
   loading: true,
   initialized: false,
-  authenticated: false
+  authenticated: false,
+  error: null
 };
 
 // Hook para gerenciar o estado de autenticação
 export const useAuthState = create<{
   authState: AuthState;
   setAuthState: (newState: Partial<AuthState> | ((prev: AuthState) => AuthState)) => void;
+  setUser: (user: AuthState['user']) => void;
+  setLoading: (loading: boolean) => void;
 }>((set) => ({
   authState: initialState,
   setAuthState: (newState) => set((state) => {
@@ -29,4 +33,17 @@ export const useAuthState = create<{
       } 
     };
   }),
+  setUser: (user) => set((state) => ({
+    authState: {
+      ...state.authState,
+      user,
+      authenticated: !!user
+    }
+  })),
+  setLoading: (loading) => set((state) => ({
+    authState: {
+      ...state.authState,
+      loading
+    }
+  }))
 }));

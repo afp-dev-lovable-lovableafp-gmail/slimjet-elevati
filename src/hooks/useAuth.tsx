@@ -7,13 +7,15 @@ import { useAuthSession } from '@/hooks/auth/useAuthSession';
 import { toast } from 'sonner';
 import { logger } from '@/utils/logger';
 import { useNavigate } from 'react-router-dom';
-import { OAuthLoginParams } from '@/types/auth';
+import { OAuthLoginParams, Client } from '@/types/auth';
 
 interface AuthContextType {
   user: any | null;
   profile: any | null;
+  client: Client | null;
   loading: boolean;
   authenticated: boolean;
+  error?: Error | null;
   setAuthState: any;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<void>;
@@ -28,18 +30,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Provider que fornece o contexto de autenticação para os componentes filhos
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { authState, setAuthState } = useAuthState();
-  const { user, loading, authenticated } = authState;
-  const { profile, status: profileStatus } = useProfile(user?.id);
+  const { user, profile, loading, authenticated, client } = authState;
+  const { profile: fetchedProfile, status: profileStatus } = useProfile(user?.id);
   
   // Inicializar a sessão do usuário
   useAuthSession();
 
   useEffect(() => {
     // Atualizar o estado do profile quando ele for carregado
-    if (!loading && user && profile && profileStatus === 'success') {
-      setAuthState({ profile });
+    if (!loading && user && fetchedProfile && profileStatus === 'success') {
+      // Criar um objeto client baseado no profile para manter compatibilidade
+      const clientData: Client = {
+        id: fetchedProfile.id,
+        full_name: fetchedProfile.full_name,
+        company_name: fetchedProfile.company_name,
+        phone: fetchedProfile.phone,
+        avatar_url: fetchedProfile.avatar_url,
+        email: user.email,
+        created_at: fetchedProfile.created_at,
+        updated_at: fetchedProfile.updated_at
+      };
+      
+      setAuthState({ 
+        profile: fetchedProfile,
+        client: clientData
+      });
     }
-  }, [profile, profileStatus, user, loading]);
+  }, [fetchedProfile, profileStatus, user, loading]);
 
   // Login com email e senha
   const signIn = async (email: string, password: string) => {
@@ -67,6 +84,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
         }
       }
+      
+      setAuthState({ error });
       
       toast.error('Erro ao fazer login', {
         description: errorMessage
@@ -118,6 +137,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       
+      setAuthState({ error });
+      
       toast.error('Erro ao criar conta', {
         description: errorMessage
       });
@@ -140,6 +161,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       logger.error("auth", "Erro durante login com OAuth", { error, provider });
       
+      setAuthState({ error });
+      
       toast.error('Erro ao fazer login', {
         description: 'Ocorreu um erro ao tentar fazer login com provedor externo.'
       });
@@ -158,6 +181,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success('Logout realizado com sucesso');
     } catch (error: any) {
       logger.error("auth", "Erro durante logout", { error });
+      
+      setAuthState({ error });
       
       toast.error('Erro ao fazer logout', {
         description: 'Ocorreu um erro ao tentar sair da sua conta.'
@@ -184,6 +209,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       logger.error("auth", "Erro ao enviar email de recuperação", { error });
       
+      setAuthState({ error });
+      
       toast.error('Erro ao enviar email', {
         description: 'Ocorreu um erro ao tentar enviar o email de recuperação.'
       });
@@ -196,8 +223,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user,
     profile,
+    client,
     loading,
     authenticated,
+    error: authState.error,
     setAuthState,
     signIn,
     signUp,

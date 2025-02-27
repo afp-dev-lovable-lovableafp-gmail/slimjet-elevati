@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useAboutSettings } from "@/hooks/useAboutSettings";
-import type { AboutSettingsFormData } from "@/types/about";
+import type { AboutSettingsFormValues } from "@/types/about";
 
 export const AboutSettings = () => {
   const { settings, loading, error, fetchSettings, updateSettings } = useAboutSettings();
 
-  const { register, handleSubmit, reset, formState: { isDirty, isSubmitting } } = useForm<AboutSettingsFormData>();
+  const { register, handleSubmit, reset, formState: { isDirty, isSubmitting } } = useForm<AboutSettingsFormValues>();
 
   useEffect(() => {
     fetchSettings();
@@ -34,7 +34,7 @@ export const AboutSettings = () => {
     }
   }, [settings, reset]);
 
-  const onSubmit = async (data: AboutSettingsFormData) => {
+  const onSubmit = async (data: AboutSettingsFormValues) => {
     // Verifica se o conteúdo é um array e converte para string
     const processArrayField = (field: string | string[] | undefined) => {
       if (Array.isArray(field)) {
@@ -44,7 +44,7 @@ export const AboutSettings = () => {
     };
 
     // Processa os campos de conteúdo
-    const processedData: AboutSettingsFormData = {
+    const processedData: AboutSettingsFormValues = {
       ...data,
       mission_content: processArrayField(data.mission_content),
       vision_content: processArrayField(data.vision_content),

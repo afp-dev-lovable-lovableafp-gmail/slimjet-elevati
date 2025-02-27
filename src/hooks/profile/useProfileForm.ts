@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Client } from "@/types/auth";
+import type { FormProfile } from "@/types/profile";
 
 export const useProfileForm = () => {
   const { user, client: authClient } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [client, setClient] = useState<Client>({
+  const [profile, setProfile] = useState<FormProfile>({
     id: "",
     full_name: "",
     company_name: null,
@@ -20,7 +21,7 @@ export const useProfileForm = () => {
   useEffect(() => {
     if (user?.id) {
       if (authClient) {
-        setClient(authClient);
+        setProfile(authClient);
       } else {
         fetchClient(user.id);
       }
@@ -39,7 +40,7 @@ export const useProfileForm = () => {
       if (error) throw error;
 
       if (data) {
-        setClient(data as Client);
+        setProfile(data as FormProfile);
       }
     } catch (error: any) {
       console.error("Error fetching client:", error);
@@ -51,7 +52,7 @@ export const useProfileForm = () => {
     }
   };
 
-  const updateProfile = async (updatedClient: Client) => {
+  const updateProfile = async (updatedProfile: FormProfile) => {
     if (!user?.id) return;
 
     try {
@@ -60,17 +61,17 @@ export const useProfileForm = () => {
       const { error } = await supabase
         .from("clients")
         .update({
-          full_name: updatedClient.full_name,
-          company_name: updatedClient.company_name,
-          phone: updatedClient.phone,
-          avatar_url: updatedClient.avatar_url,
+          full_name: updatedProfile.full_name,
+          company_name: updatedProfile.company_name,
+          phone: updatedProfile.phone,
+          avatar_url: updatedProfile.avatar_url,
           updated_at: new Date().toISOString()
         })
-        .eq("id", updatedClient.id);
+        .eq("id", updatedProfile.id);
 
       if (error) throw error;
 
-      setClient(updatedClient);
+      setProfile(updatedProfile);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -83,7 +84,7 @@ export const useProfileForm = () => {
   };
 
   return {
-    profile: client, // Mantendo compatibilidade com código existente
+    profile, // Mantendo compatibilidade com código existente
     isLoading,
     updateProfile
   };
